@@ -11,7 +11,7 @@
     <description></description>
     <display-name>UploadServlet</display-name>
     <servlet-name>UploadServlet</servlet-name>
-    <servlet-class>net.codejava.upload.UploadServlet</servlet-class>
+    <servlet-class>server.UploadServlet</servlet-class>
   </servlet>
   
   <servlet-mapping>
