@@ -119,7 +119,7 @@ public class UploadServlet extends HttpServlet {
 		response.setContentLength((int) file.length());
 		response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 		
-		ServletOutputStream os       = response.getOutputStream();
+		ServletOutputStream os = response.getOutputStream();
 		byte[] bufferData = new byte[1024];
 		int read=0;
 		while((read = fis.read(bufferData))!= -1){

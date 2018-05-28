@@ -8,8 +8,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedReader;
 import java.io.File;
- 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -34,7 +40,7 @@ public class SwingFileUploadHTTP extends JFrame implements
             "Browse");
  
     private JButton buttonUpload = new JButton("Upload");
- 
+    private JButton buttonDownload = new JButton("Download");
     private JLabel labelProgress = new JLabel("Progress:");
     private JProgressBar progressBar = new JProgressBar(0, 100);
  
@@ -55,6 +61,17 @@ public class SwingFileUploadHTTP extends JFrame implements
                 buttonUploadActionPerformed(event);
             }
         });
+        
+        buttonDownload.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				try {
+					buttonDownloadActionPerformed(event);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
  
         progressBar.setPreferredSize(new Dimension(200, 30));
         progressBar.setStringPainted(true);
@@ -80,6 +97,10 @@ public class SwingFileUploadHTTP extends JFrame implements
         constraints.anchor = GridBagConstraints.CENTER;
         add(buttonUpload, constraints);
  
+        constraints.gridy = 2;
+        constraints.anchor = GridBagConstraints.EAST;
+        add(buttonDownload, constraints);
+        
         constraints.gridx = 0;
         constraints.gridy = 3;
         constraints.gridwidth = 1;
@@ -90,6 +111,10 @@ public class SwingFileUploadHTTP extends JFrame implements
         constraints.weightx = 1.0;
         constraints.fill = GridBagConstraints.HORIZONTAL;
         add(progressBar, constraints);
+        
+        
+        
+  
  
         pack();
         setLocationRelativeTo(null);    // center on screen
@@ -131,6 +156,40 @@ public class SwingFileUploadHTTP extends JFrame implements
                     JOptionPane.ERROR_MESSAGE);
         }
     }
+    
+    /**
+     * handle click event of the Download button
+     * @throws IOException 
+     */
+    private void buttonDownloadActionPerformed(ActionEvent event) throws IOException {
+    	String url = "http://localhost:8080/UploadServletApp/UploadServlet?fileName=" + fieldURL.getText();
+    	System.out.println("url for GET is : " + url);
+    	URL urlObj = new URL(url);
+		HttpURLConnection con = (HttpURLConnection) urlObj.openConnection();
+
+		// optional default is GET
+		con.setRequestMethod("GET");
+
+		//add request header
+		//con.setRequestProperty("User-Agent", USER_AGENT);
+
+		int responseCode = con.getResponseCode();
+		System.out.println("Sending 'GET' request to URL : " + url);
+		System.out.println("Response Code : " + responseCode);
+
+		BufferedReader in = new BufferedReader(
+		        new InputStreamReader(con.getInputStream()));
+		String inputLine;
+		StringBuffer response = new StringBuffer();
+
+		while ((inputLine = in.readLine()) != null) {
+			response.append(inputLine);
+		}
+		in.close();
+
+		//print result
+		System.out.println(response.toString());
+    }
  
     /**
      * Update the progress bar's state whenever the progress of upload changes.
@@ -141,6 +200,8 @@ public class SwingFileUploadHTTP extends JFrame implements
             progressBar.setValue(progress);
         }
     }
+    
+    
  
     /**
      * Launch the application
