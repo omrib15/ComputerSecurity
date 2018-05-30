@@ -9,12 +9,17 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -43,7 +48,9 @@ public class SwingFileUploadHTTP extends JFrame implements
     private JButton buttonDownload = new JButton("Download");
     private JLabel labelProgress = new JLabel("Progress:");
     private JProgressBar progressBar = new JProgressBar(0, 100);
- 
+    
+    private String serverUrl = "http://localhost:8080/UploadServletApp/UploadServlet";
+    
     public SwingFileUploadHTTP() {
         super("Swing File Upload to HTTP server");
  
@@ -162,33 +169,12 @@ public class SwingFileUploadHTTP extends JFrame implements
      * @throws IOException 
      */
     private void buttonDownloadActionPerformed(ActionEvent event) throws IOException {
-    	String url = "http://localhost:8080/UploadServletApp/UploadServlet?fileName=" + fieldURL.getText();
+    	
+    	String fileName = fieldURL.getText();
+    	String url = serverUrl+"?fileName=" + fileName;
     	System.out.println("url for GET is : " + url);
-    	URL urlObj = new URL(url);
-		HttpURLConnection con = (HttpURLConnection) urlObj.openConnection();
-
-		// optional default is GET
-		con.setRequestMethod("GET");
-
-		//add request header
-		//con.setRequestProperty("User-Agent", USER_AGENT);
-
-		int responseCode = con.getResponseCode();
-		System.out.println("Sending 'GET' request to URL : " + url);
-		System.out.println("Response Code : " + responseCode);
-
-		BufferedReader in = new BufferedReader(
-		        new InputStreamReader(con.getInputStream()));
-		String inputLine;
-		StringBuffer response = new StringBuffer();
-
-		while ((inputLine = in.readLine()) != null) {
-			response.append(inputLine);
-		}
-		in.close();
-
-		//print result
-		System.out.println(response.toString());
+    	HttpDownloadUtility.downloadFile(url, "C:/omri/study/sem8/security/codeJava/");
+    	
     }
  
     /**
@@ -201,7 +187,7 @@ public class SwingFileUploadHTTP extends JFrame implements
         }
     }
     
-    
+  
  
     /**
      * Launch the application
