@@ -24,7 +24,6 @@ import java.nio.file.Paths;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
@@ -42,19 +41,19 @@ public class SwingFileUploadHTTP extends JFrame implements
     private JLabel labelURL = new JLabel("Upload URL: ");
     private JTextField fieldURL = new JTextField(30);
  
-    private JFilePicker filePicker = new JFilePicker("Choose a file: ", "Browse");
+    private JFilePicker filePicker = new JFilePicker("Choose a file: ",
+            "Browse");
  
     private JButton buttonUpload = new JButton("Upload");
     private JButton buttonDownload = new JButton("Download");
     private JLabel labelProgress = new JLabel("Progress:");
     private JProgressBar progressBar = new JProgressBar(0, 100);
-    private JList fileList = new JList();
-    private JLabel tesLabel = new JLabel("testestest");
+    
     private String serverUrl = "http://localhost:8080/UploadServletApp/UploadServlet";
     
     public SwingFileUploadHTTP() {
         super("Swing File Upload to HTTP server");
-        
+ 
         // set up layout
         setLayout(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
@@ -75,6 +74,7 @@ public class SwingFileUploadHTTP extends JFrame implements
 				try {
 					buttonDownloadActionPerformed(event);
 				} catch (IOException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -119,15 +119,9 @@ public class SwingFileUploadHTTP extends JFrame implements
         constraints.fill = GridBagConstraints.HORIZONTAL;
         add(progressBar, constraints);
         
-        constraints.gridx = 1;
-        constraints.gridy = 6;
-        constraints.weightx = 1.0;
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        add(fileList,constraints);
         
         
-        //for commiting
-        int i = 0;
+  
  
         pack();
         setLocationRelativeTo(null);    // center on screen
