@@ -1,6 +1,7 @@
 package client;
 
 import java.awt.Dimension;
+import javax.swing.SwingConstants;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -28,6 +29,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -47,11 +49,14 @@ public class UserFrame extends JFrame implements
     private JButton buttonDownload = new JButton("Download");
     private JLabel labelProgress = new JLabel("Progress:");
     private JProgressBar progressBar = new JProgressBar(0, 100);
-    private JLabel labelDownload = new JLabel("Your Files:");
+    private JLabel labelFiles = new JLabel("Your Files:");
     
     private String serverUrl = "http://localhost:8080/UploadServletApp/UploadServlet";
     private DefaultListModel fileListModel = new DefaultListModel();
     private JList fileList = new JList(fileListModel);
+    private JScrollPane fileListScroller = new JScrollPane(fileList);
+    
+    
     
     public UserFrame() {
         super("Swing File Upload to HTTP server");
@@ -82,6 +87,8 @@ public class UserFrame extends JFrame implements
 			}
 		});
  
+        
+        fileListScroller.setPreferredSize(new Dimension(200, 200));
         progressBar.setPreferredSize(new Dimension(200, 30));
         progressBar.setStringPainted(true);
  
@@ -106,7 +113,8 @@ public class UserFrame extends JFrame implements
         constraints.anchor = GridBagConstraints.CENTER;
         add(buttonUpload, constraints);
  
-        constraints.gridy = 2;
+        constraints.gridx = 1;
+        constraints.gridy = 4;
         constraints.anchor = GridBagConstraints.EAST;
         add(buttonDownload, constraints);
         
@@ -121,18 +129,20 @@ public class UserFrame extends JFrame implements
         constraints.fill = GridBagConstraints.HORIZONTAL;
         add(progressBar, constraints);
         
-        
-        constraints.gridy = 4;
-        constraints.anchor = GridBagConstraints.CENTER;
-        add(labelDownload,constraints);
-        
-        
+       
         constraints.gridx = 0;
-        constraints.gridy = 5;
+        constraints.gridy = 4;
+        constraints.fill = GridBagConstraints.NONE;
+        constraints.anchor = GridBagConstraints.WEST;
+        add(labelFiles,constraints);
+        
+        
+        constraints.gridx = 1;
+        constraints.gridy = 4;
         constraints.weightx = 0.0;
-        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.fill = GridBagConstraints.NONE;
         fileListModel.addElement("hi");
-        add(fileList,constraints);
+        add(fileListScroller,constraints);
         
   
  
