@@ -21,9 +21,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
@@ -36,22 +38,22 @@ import client.JFilePicker;
  * A Swing application that uploads files to a HTTP server.
  *
  */
-public class SwingFileUploadHTTP extends JFrame implements
+public class UserFrame extends JFrame implements
         PropertyChangeListener {
     private JLabel labelURL = new JLabel("Upload URL: ");
     private JTextField fieldURL = new JTextField(30);
- 
-    private JFilePicker filePicker = new JFilePicker("Choose a file: ",
-            "Browse");
- 
+    private JFilePicker filePicker = new JFilePicker("Choose a file: ", "Browse");
     private JButton buttonUpload = new JButton("Upload");
     private JButton buttonDownload = new JButton("Download");
     private JLabel labelProgress = new JLabel("Progress:");
     private JProgressBar progressBar = new JProgressBar(0, 100);
+    private JLabel labelDownload = new JLabel("Your Files:");
     
     private String serverUrl = "http://localhost:8080/UploadServletApp/UploadServlet";
+    private DefaultListModel fileListModel = new DefaultListModel();
+    private JList fileList = new JList(fileListModel);
     
-    public SwingFileUploadHTTP() {
+    public UserFrame() {
         super("Swing File Upload to HTTP server");
  
         // set up layout
@@ -120,6 +122,17 @@ public class SwingFileUploadHTTP extends JFrame implements
         add(progressBar, constraints);
         
         
+        constraints.gridy = 4;
+        constraints.anchor = GridBagConstraints.CENTER;
+        add(labelDownload,constraints);
+        
+        
+        constraints.gridx = 0;
+        constraints.gridy = 5;
+        constraints.weightx = 0.0;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        fileListModel.addElement("hi");
+        add(fileList,constraints);
         
   
  
@@ -202,7 +215,7 @@ public class SwingFileUploadHTTP extends JFrame implements
  
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                new SwingFileUploadHTTP().setVisible(true);
+                new UserFrame().setVisible(true);
             }
         });
     }
