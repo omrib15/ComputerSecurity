@@ -126,8 +126,8 @@ public class SwingFileUploadHTTP extends JFrame implements
         add(fileList,constraints);
         
         
-        
-  
+        //for commiting
+        int i = 0;
  
         pack();
         setLocationRelativeTo(null);    // center on screen
