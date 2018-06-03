@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -129,5 +130,23 @@ public class UploadServlet extends HttpServlet {
 		os.close();
 		fis.close();
 		System.out.println("File downloaded at client successfully");
+	}
+	
+	private ArrayList<String> getFileNames(String dir){
+		File folder = new File(dir);
+		File[] listOfFiles = folder.listFiles();
+		ArrayList<String> fileNames = new ArrayList<String>();
+		
+		    for (int i = 0; i < listOfFiles.length; i++) {
+		    	String fName = listOfFiles[i].getName();
+		    	
+		    	if (listOfFiles[i].isFile()) { 
+		        fileNames.add(fName);
+		      } else if (listOfFiles[i].isDirectory()) {
+		        System.out.println("Directory " + fName);
+		      }
+		    }
+		
+		return fileNames;
 	}
 }

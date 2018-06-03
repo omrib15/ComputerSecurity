@@ -109,7 +109,7 @@ public class MultipartUploadUtility {
             reader.close();
             httpConn.disconnect();
         } else {
-            throw new IOException("Server returned non-OK status: " + status);
+
         }
     }
 }

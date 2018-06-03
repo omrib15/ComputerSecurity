@@ -42,8 +42,6 @@ import client.JFilePicker;
  */
 public class UserFrame extends JFrame implements
         PropertyChangeListener {
-    private JLabel labelURL = new JLabel("Upload URL: ");
-    private JTextField fieldURL = new JTextField(30);
     private JFilePicker filePicker = new JFilePicker("Choose a file: ", "Browse");
     private JButton buttonUpload = new JButton("Upload");
     private JButton buttonDownload = new JButton("Download");
@@ -51,7 +49,7 @@ public class UserFrame extends JFrame implements
     private JProgressBar progressBar = new JProgressBar(0, 100);
     private JLabel labelFiles = new JLabel("Your Files:");
     
-    private String serverUrl = "http://localhost:8080/UploadServletApp/UploadServlet";
+    private String uploadUrl = "http://localhost:8080/UploadServletApp/UploadServlet";
     private DefaultListModel fileListModel = new DefaultListModel();
     private JList fileList = new JList(fileListModel);
     private JScrollPane fileListScroller = new JScrollPane(fileList);
@@ -93,15 +91,17 @@ public class UserFrame extends JFrame implements
         progressBar.setStringPainted(true);
  
         // add components to the frame
-        constraints.gridx = 0;
+        /*constraints.gridx = 0;
         constraints.gridy = 0;
         add(labelURL, constraints);
- 
+ 		
+        
         constraints.gridx = 1;
         constraints.fill = GridBagConstraints.HORIZONTAL;
         constraints.weightx = 1.0;
         add(fieldURL, constraints);
- 
+ 		*/
+        
         constraints.gridx = 0;
         constraints.gridy = 1;
         constraints.weightx = 0.0;
@@ -141,7 +141,7 @@ public class UserFrame extends JFrame implements
         constraints.gridy = 4;
         constraints.weightx = 0.0;
         constraints.fill = GridBagConstraints.NONE;
-        fileListModel.addElement("hi");
+        fileListModel.addElement("test.txt");
         add(fileListScroller,constraints);
         
   
@@ -155,15 +155,14 @@ public class UserFrame extends JFrame implements
      * handle click event of the Upload button
      */
     private void buttonUploadActionPerformed(ActionEvent event) {
-        String uploadURL = fieldURL.getText();
+      
         String filePath = filePicker.getSelectedFilePath();
- 
-        // validate input first
-        if (uploadURL.equals("")) {
-            JOptionPane.showMessageDialog(this, "Please enter upload URL!",
+        
+        //validate server url
+        if(uploadUrl.equals("")){
+        	JOptionPane.showMessageDialog(this, "Please enter upload URL!",
                     "Error", JOptionPane.ERROR_MESSAGE);
-            fieldURL.requestFocus();
-            return;
+        	return;
         }
  
         if (filePath.equals("")) {
@@ -177,7 +176,8 @@ public class UserFrame extends JFrame implements
             File uploadFile = new File(filePath);
             progressBar.setValue(0);
  
-            UploadTask task = new UploadTask(uploadURL, uploadFile);
+            UploadTask task = new UploadTask(uploadUrl, uploadFile);
+            
             task.addPropertyChangeListener(this);
             task.execute();
         } catch (Exception ex) {
@@ -193,8 +193,8 @@ public class UserFrame extends JFrame implements
      */
     private void buttonDownloadActionPerformed(ActionEvent event) throws IOException {
     	
-    	String fileName = fieldURL.getText();
-    	String url = serverUrl+"?fileName=" + fileName;
+    	String fileName = (String) fileList.getSelectedValue();
+    	String url = uploadUrl+"?fileName=" + fileName;
     	System.out.println("url for GET is : " + url);
     	HttpDownloadUtility.downloadFile(url, "C:/omri/study/sem8/security/codeJava/");
     	

@@ -43,7 +43,7 @@ public class UploadTask extends SwingWorker<Void, Integer> {
                 percentCompleted = (int) (totalBytesRead * 100 / fileSize);
                 setProgress(percentCompleted);
             }
- 
+            
             inputStream.close();
             util.finish();
         } catch (IOException ex) {
