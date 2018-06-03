@@ -174,8 +174,9 @@ public class UserFrame extends JFrame implements
  
         try {
             File uploadFile = new File(filePath);
+            System.out.println("hi");
             progressBar.setValue(0);
- 
+            System.out.println("hi 2");
             UploadTask task = new UploadTask(uploadUrl, uploadFile);
             
             task.addPropertyChangeListener(this);
