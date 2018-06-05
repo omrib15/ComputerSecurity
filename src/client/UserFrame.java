@@ -155,7 +155,7 @@ public class UserFrame extends JFrame implements
      * handle click event of the Upload button
      */
     private void buttonUploadActionPerformed(ActionEvent event) {
-      
+    	
         String filePath = filePicker.getSelectedFilePath();
         
         //validate server url
