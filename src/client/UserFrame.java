@@ -85,7 +85,7 @@ public class UserFrame extends JFrame implements
         fileListScroller.setPreferredSize(new Dimension(200, 200));
         progressBar.setPreferredSize(new Dimension(200, 30));
         progressBar.setStringPainted(true);
-        UpdateFileList(fileListModel);
+        UpdateFileList();
         
         
         // add components to the frame
@@ -179,7 +179,7 @@ public class UserFrame extends JFrame implements
             task.addPropertyChangeListener(this);
             task.execute();
             //update the file list with the new file that was uploaded
-            UpdateFileList(fileListModel);
+            UpdateFileList();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this,
                     "Error executing upload task: " + ex.getMessage(), "Error",
@@ -204,7 +204,7 @@ public class UserFrame extends JFrame implements
     /*
      * updates the list of file names with file names from server
      */
-    private void UpdateFileList(DefaultListModel fileListModel) throws IOException{
+    private void UpdateFileList() throws IOException{
     	
     	Client client = ClientBuilder.newClient();
     	
