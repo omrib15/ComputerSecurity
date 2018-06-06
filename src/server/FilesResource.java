@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response;
 
 @Path("/Files")
 public class FilesResource {
-//C:/omri/study/sem8/security/codeJava/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/UploadServletApp/upload
+
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<String> getFileNames(){
@@ -34,12 +34,6 @@ public class FilesResource {
 			}
 		}
 		
-		//GenericEntity<List<String>> entity = new GenericEntity<List<String>>(fileNames) {};
-		//Response response = Response.ok(entity).build();
-		//return new JSONArray(fileNames);
-		
-		    //fileList.Print();
-		    //return fileList;
 		return fileNames;
 	}
 }
