@@ -9,26 +9,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 import java.util.ArrayList;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
+
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -192,6 +178,8 @@ public class UserFrame extends JFrame implements
             
             task.addPropertyChangeListener(this);
             task.execute();
+            //update the file list with the new file that was uploaded
+            UpdateFileList(fileListModel);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this,
                     "Error executing upload task: " + ex.getMessage(), "Error",
@@ -220,14 +208,19 @@ public class UserFrame extends JFrame implements
     	
     	Client client = ClientBuilder.newClient();
     	
+    	//send a get request and get the response
     	Response response = client.target("http://localhost:8080/UploadServletApp/webapi/Files")
     			.request().get();
     	
     	ArrayList list = response.readEntity(ArrayList.class);
+    	
+    	//update the list
     	for(int i = 0; i < list.size() ; i++){
     		String fileName = (String) list.get(i);
-    		fileListModel.addElement(fileName);
-    		System.out.println(fileName);
+    		//prevent duplicates
+    		if(!fileListModel.contains(fileName)){
+    			fileListModel.addElement(fileName);
+    		}
     	}
     	
     }
