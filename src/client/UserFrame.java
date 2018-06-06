@@ -9,18 +9,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
+import java.util.ArrayList;
+
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -33,7 +26,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
- 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.Response;
+
 import client.JFilePicker;
  
 /**
@@ -56,7 +52,7 @@ public class UserFrame extends JFrame implements
     
     
     
-    public UserFrame() {
+    public UserFrame() throws IOException {
         super("Swing File Upload to HTTP server");
  
         // set up layout
@@ -89,7 +85,9 @@ public class UserFrame extends JFrame implements
         fileListScroller.setPreferredSize(new Dimension(200, 200));
         progressBar.setPreferredSize(new Dimension(200, 30));
         progressBar.setStringPainted(true);
- 
+        UpdateFileList();
+        
+        
         // add components to the frame
         /*constraints.gridx = 0;
         constraints.gridy = 0;
@@ -141,7 +139,6 @@ public class UserFrame extends JFrame implements
         constraints.gridy = 4;
         constraints.weightx = 0.0;
         constraints.fill = GridBagConstraints.NONE;
-        fileListModel.addElement("test.txt");
         add(fileListScroller,constraints);
         
   
@@ -155,7 +152,7 @@ public class UserFrame extends JFrame implements
      * handle click event of the Upload button
      */
     private void buttonUploadActionPerformed(ActionEvent event) {
-      
+    	
         String filePath = filePicker.getSelectedFilePath();
         
         //validate server url
@@ -181,6 +178,8 @@ public class UserFrame extends JFrame implements
             
             task.addPropertyChangeListener(this);
             task.execute();
+            //update the file list with the new file that was uploaded
+            UpdateFileList();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this,
                     "Error executing upload task: " + ex.getMessage(), "Error",
@@ -200,7 +199,33 @@ public class UserFrame extends JFrame implements
     	HttpDownloadUtility.downloadFile(url, "C:/omri/study/sem8/security/codeJava/");
     	
     }
- 
+    
+    
+    /*
+     * updates the list of file names with file names from server
+     */
+    private void UpdateFileList() throws IOException{
+    	
+    	Client client = ClientBuilder.newClient();
+    	
+    	//send a get request and get the response
+    	Response response = client.target("http://localhost:8080/UploadServletApp/webapi/Files")
+    			.request().get();
+    	
+    	ArrayList list = response.readEntity(ArrayList.class);
+    	
+    	//update the list
+    	for(int i = 0; i < list.size() ; i++){
+    		String fileName = (String) list.get(i);
+    		//prevent duplicates
+    		if(!fileListModel.contains(fileName)){
+    			fileListModel.addElement(fileName);
+    		}
+    	}
+    	
+    }
+    
+    
     /**
      * Update the progress bar's state whenever the progress of upload changes.
      */
@@ -226,7 +251,12 @@ public class UserFrame extends JFrame implements
  
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                new UserFrame().setVisible(true);
+                try {
+					new UserFrame().setVisible(true);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
             }
         });
     }
