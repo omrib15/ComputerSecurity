@@ -109,7 +109,7 @@ public class MultipartUploadUtility {
             reader.close();
             httpConn.disconnect();
         } else {
-
+        	System.out.println("Upload caused server to respond with status: "+status);
         }
     }
 }

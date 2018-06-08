@@ -1,9 +1,13 @@
 package server;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.websocket.server.PathParam;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -18,22 +22,47 @@ public class FilesResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<String> getFileNames(){
+		//will change to user specific directory
 		String dir = "C:/omri/study/sem8/security/codeJava/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/UploadServletApp/upload";
 		File folder = new File(dir);
 		File[] listOfFiles = folder.listFiles();
 		List<String> fileNames = new ArrayList<String>();
 		
+		//this loop fills the list of file names
 		for (int i = 0; i < listOfFiles.length; i++) {
 			String fName = listOfFiles[i].getName();
 			if (listOfFiles[i].isFile()) { 
 				fileNames.add(fName);
-				System.out.println( fName);
-
-			} else if (listOfFiles[i].isDirectory()) {
+			} 
+			else if (listOfFiles[i].isDirectory()) {
 				System.out.println("Directory " + fName);
 			}
 		}
 		
 		return fileNames;
 	}
+	
+	@DELETE
+	@Path("/{fileName}")
+	public void deleteFile(@PathParam("fileName") String fileName){
+		String dir = "C:/omri/study/sem8/security/codeJava/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/UploadServletApp/upload";
+
+		try{
+
+			File file = new File(dir + "/" + fileName);
+
+			if(file.delete()){
+				System.out.println(file.getName() + " is deleted!");
+			}else{
+				System.out.println("Delete operation is failed.");
+			}
+
+		}catch(Exception e){
+
+			e.printStackTrace();
+
+		}
+	}
+	
+	
 }

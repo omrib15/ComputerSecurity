@@ -1,6 +1,8 @@
 package client;
 
 import java.awt.Dimension;
+import java.awt.Font;
+
 import javax.swing.SwingConstants;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -14,9 +16,9 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
-
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -31,6 +33,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
 import client.JFilePicker;
+
  
 /**
  * A Swing application that uploads files to a HTTP server.
@@ -39,13 +42,22 @@ import client.JFilePicker;
 public class UserFrame extends JFrame implements
         PropertyChangeListener {
     private JFilePicker filePicker = new JFilePicker("Choose a file: ", "Browse");
+    private JFileChooser dirChooser = new JFileChooser();
+    
     private JButton buttonUpload = new JButton("Upload");
     private JButton buttonDownload = new JButton("Download");
-    private JLabel labelProgress = new JLabel("Progress:");
+    private JButton buttonDelete = new JButton("Delete");
+    private JButton buttonRefresh = new JButton("Refresh");
+    
     private JProgressBar progressBar = new JProgressBar(0, 100);
+    
+    private JLabel labelUpload = new JLabel("Upload:");
+    private JLabel labelDownload = new JLabel("Manage your files: ");
+    private JLabel labelProgress = new JLabel("Upload progress:");
     private JLabel labelFiles = new JLabel("Your Files:");
     
     private String uploadUrl = "http://localhost:8080/UploadServletApp/UploadServlet";
+    
     private DefaultListModel fileListModel = new DefaultListModel();
     private JList fileList = new JList(fileListModel);
     private JScrollPane fileListScroller = new JScrollPane(fileList);
@@ -63,7 +75,9 @@ public class UserFrame extends JFrame implements
  
         // set up components
         filePicker.setMode(JFilePicker.MODE_OPEN);
+        dirChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
  
+        //adding action listeners to buttons
         buttonUpload.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 buttonUploadActionPerformed(event);
@@ -75,19 +89,42 @@ public class UserFrame extends JFrame implements
 				try {
 					buttonDownloadActionPerformed(event);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 		});
- 
+
+        buttonDelete.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				buttonDeleteActionPerformed(event);
+			}
+		});
         
-        fileListScroller.setPreferredSize(new Dimension(200, 200));
-        progressBar.setPreferredSize(new Dimension(200, 30));
+        buttonRefresh.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				buttonRefreshActionPerformed(event);
+			}
+		});
+        
+        //set some labels bold
+        Font upFont = labelUpload.getFont();
+        labelUpload.setFont(new Font(upFont.getFontName(), Font.BOLD, upFont.getSize()+2));
+        labelDownload.setFont(new Font(upFont.getFontName(), Font.BOLD, upFont.getSize()+2));
+
+        fileListScroller.setPreferredSize(new Dimension(100, 150));
+        progressBar.setPreferredSize(new Dimension(215, 30));
         progressBar.setStringPainted(true);
-        UpdateFileList();
+        //fill the list with the user's file names 
+        updateFileList();
         
         
+        //Adding components to the frame
+        
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.gridwidth = 1;
+        constraints.anchor = GridBagConstraints.WEST;
+        add(labelUpload, constraints);
         
         constraints.gridx = 0;
         constraints.gridy = 1;
@@ -96,14 +133,27 @@ public class UserFrame extends JFrame implements
         constraints.fill = GridBagConstraints.NONE;
         add(filePicker, constraints);
  
+        //Buttons
         constraints.gridy = 2;
         constraints.anchor = GridBagConstraints.CENTER;
         add(buttonUpload, constraints);
  
-        constraints.gridx = 1;
-        constraints.gridy = 4;
-        constraints.anchor = GridBagConstraints.EAST;
+        constraints.gridx = 0;
+        constraints.gridy = 5;
+        constraints.anchor = GridBagConstraints.NORTH;
+        add(buttonRefresh, constraints);
+        
+        constraints.gridx = 0;
+        constraints.gridy = 5;
+        constraints.anchor = GridBagConstraints.CENTER;
         add(buttonDownload, constraints);
+        
+        constraints.gridx = 0;
+        constraints.gridy = 5;
+        constraints.anchor = GridBagConstraints.SOUTH;
+        add(buttonDelete, constraints);
+        
+        
         
         constraints.gridx = 0;
         constraints.gridy = 3;
@@ -113,21 +163,27 @@ public class UserFrame extends JFrame implements
  
         constraints.gridx = 1;
         constraints.weightx = 1.0;
-        constraints.fill = GridBagConstraints.HORIZONTAL;
+        //constraints.fill = GridBagConstraints.HORIZONTAL;
         add(progressBar, constraints);
         
-       
         constraints.gridx = 0;
         constraints.gridy = 4;
+        constraints.gridwidth = 1;
+        constraints.anchor = GridBagConstraints.WEST;
+        add(labelDownload, constraints);
+       
+        /*constraints.gridx = 0;
+        constraints.gridy = 5;
         constraints.fill = GridBagConstraints.NONE;
         constraints.anchor = GridBagConstraints.WEST;
         add(labelFiles,constraints);
+        */
         
-        
-        constraints.gridx = 1;
-        constraints.gridy = 4;
+        constraints.gridx = 0;
+        constraints.gridy = 5;
         constraints.weightx = 0.0;
-        constraints.fill = GridBagConstraints.NONE;
+        constraints.anchor = GridBagConstraints.EAST;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
         add(fileListScroller,constraints);
         
   
@@ -159,16 +215,36 @@ public class UserFrame extends JFrame implements
         }
  
         try {
-            File uploadFile = new File(filePath);
-            System.out.println("hi");
-            progressBar.setValue(0);
-            System.out.println("hi 2");
-            UploadTask task = new UploadTask(uploadUrl, uploadFile);
+        	File uploadFile = new File(filePath);
+        	
+        	progressBar.setValue(0);
+        	
+        	UploadTask task = new UploadTask(uploadUrl, uploadFile){
+        		@Override
+        		public void done(){
+        			if (!isCancelled()) {
+        				
+        				try {
+							updateFileList();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+				
+        				JOptionPane.showMessageDialog(null,
+        						"File has been uploaded successfully!", "Message",
+        						JOptionPane.INFORMATION_MESSAGE);
+        			}
+        			
+        		}
+            };
             
             task.addPropertyChangeListener(this);
             task.execute();
-            //update the file list with the new file that was uploaded
-            UpdateFileList();
+            
+            //update the file list with the new file that was uploaded   
+       
+           // updateFileList();
+            
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this,
                     "Error executing upload task: " + ex.getMessage(), "Error",
@@ -181,19 +257,76 @@ public class UserFrame extends JFrame implements
      * @throws IOException 
      */
     private void buttonDownloadActionPerformed(ActionEvent event) throws IOException {
-    	
-    	String fileName = (String) fileList.getSelectedValue();
-    	String url = uploadUrl+"?fileName=" + fileName;
-    	System.out.println("url for GET is : " + url);
-    	HttpDownloadUtility.downloadFile(url, "C:/omri/study/sem8/security/codeJava/");
+    	String dest = "";
+    	if( dirChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION){
+    		//get destination path
+    		dest = dirChooser.getSelectedFile().getAbsolutePath();
+    		
+    		//download the file to the selected destination
+    		String fileName = (String) fileList.getSelectedValue();
+        	String url = uploadUrl+"?fileName=" + fileName;
+        	System.out.println("get url : " +url);
+        	HttpDownloadUtility.downloadFile(url, dest);
+    	}
     	
     }
     
+    /**
+     * handle click event of the Delete button
+     */
+    private void buttonDeleteActionPerformed(ActionEvent event){
+
+    	String fileName = (String) fileList.getSelectedValue();
+
+    	if(fileName != null){
+    		//prompt a user confirmation
+    		int userRes = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete file: " + fileName, "Confirm",
+    				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+    		if (userRes == JOptionPane.NO_OPTION) {
+    			System.out.println("No button clicked");
+    		} else if (userRes == JOptionPane.YES_OPTION) {
+    			sendDeleteRequest(fileName);
+    			try {
+					updateFileList();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+    		} else if (userRes == JOptionPane.CLOSED_OPTION) {
+    			System.out.println("JOptionPane closed");
+    		}
+
+    	}
+    }
+    
+    private void sendDeleteRequest(String fileName){
+    	Client client = ClientBuilder.newClient();
+    	Response response = client.target("http://localhost:8080/UploadServletApp/webapi/Files/"+fileName)
+    			.request().delete();
+    	int status = response.getStatus();
+    	
+    	if(status != 200 ){
+    		JOptionPane.showMessageDialog(this,
+                    "Error executing delete task: server responded with " + status +" status code", "Error",
+                    JOptionPane.ERROR_MESSAGE);
+    	}
+    }
+    
+    /**
+     * handle click event of the Refresh button
+     */
+    private void buttonRefreshActionPerformed(ActionEvent event){
+    	try {
+			updateFileList();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
     
     /*
      * updates the list of file names with file names from server
      */
-    private void UpdateFileList() throws IOException{
+    private void updateFileList() throws IOException{
     	
     	Client client = ClientBuilder.newClient();
     	
@@ -202,6 +335,9 @@ public class UserFrame extends JFrame implements
     			.request().get();
     	
     	ArrayList list = response.readEntity(ArrayList.class);
+    	
+    	//clear the list
+    	fileListModel.clear();
     	
     	//update the list
     	for(int i = 0; i < list.size() ; i++){
