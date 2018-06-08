@@ -6,10 +6,11 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.websocket.server.PathParam;
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
@@ -46,11 +47,11 @@ public class FilesResource {
 	@Path("/{fileName}")
 	public void deleteFile(@PathParam("fileName") String fileName){
 		String dir = "C:/omri/study/sem8/security/codeJava/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/UploadServletApp/upload";
-
+		
 		try{
-
 			File file = new File(dir + "/" + fileName);
-
+			
+			System.out.println("path to file: "+ dir + "/" + fileName);
 			if(file.delete()){
 				System.out.println(file.getName() + " is deleted!");
 			}else{
