@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.glassfish.jersey.internal.util.Base64;
 
 /**
  * A Java servlet that handles file upload from client.
@@ -27,16 +29,18 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 public class UploadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	private static final String UPLOAD_DIRECTORY = "upload";
+	private static final String UPLOAD_DIRECTORY = "users";
 	private static final int THRESHOLD_SIZE 	= 1024 * 1024 * 3; 	// 3MB
 	private static final int MAX_FILE_SIZE 		= 1024 * 1024 * 40; // 40MB
 	private static final int MAX_REQUEST_SIZE 	= 1024 * 1024 * 50; // 50MB
-
+	private static final String AUTHORIZATION_HEADER_PREFIX = "Basic ";
 	/**
 	 * handles file upload via HTTP POST method
 	 */
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
+		
+		String requestUsername;
 		
 		// checks if the request actually contains upload file
 		if (!ServletFileUpload.isMultipartContent(request)) {
@@ -46,6 +50,9 @@ public class UploadServlet extends HttpServlet {
 			writer.flush();
 			return;
 		}
+		
+		requestUsername = getRequester(request.getHeader("Authorization"));
+		System.out.println("---------requestUsername = " + requestUsername);
 		
 		// configures upload settings
 		DiskFileItemFactory factory = new DiskFileItemFactory();
@@ -59,9 +66,15 @@ public class UploadServlet extends HttpServlet {
 		// constructs the directory path to store upload file
 		String uploadPath = getServletContext().getRealPath("")
 			+ File.separator + UPLOAD_DIRECTORY;
-		System.out.println("uploadpath : " +uploadPath);
+		
 		// creates the directory if it does not exist
 		File uploadDir = new File(uploadPath);
+		if (!uploadDir.exists()) {
+			uploadDir.mkdir();
+		}
+		
+		uploadPath += File.separator + requestUsername; 
+		uploadDir = new File(uploadPath);
 		if (!uploadDir.exists()) {
 			uploadDir.mkdir();
 		}
@@ -86,17 +99,19 @@ public class UploadServlet extends HttpServlet {
 				}
 			}
 			request.setAttribute("message", "Upload has been done successfully!");
+			System.out.println(" - - - - -response status = = = = " +response.getStatus());
 		} catch (Exception ex) {
 			request.setAttribute("message", "There was an error: " + ex.getMessage());
 		}
-		getServletContext().getRequestDispatcher("/message.jsp").forward(request, response);
+		
 	}
 	
 	/*
 	 * handles file downloads
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String fileName = request.getParameter("fileName");
+		String fileName = request.getParameter("fileName").replaceAll(";", " ");
+		String username = request.getParameter("username");
 		
 		System.out.println("trying to get file : "+ fileName);
 		
@@ -105,7 +120,7 @@ public class UploadServlet extends HttpServlet {
 		}
         
         String downloadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIRECTORY 
-        		+ File.separator + fileName  ;
+        		+ File.separator + username + File.separator +fileName  ;
         
         File file = new File(downloadPath);
 		if(!file.exists()){
@@ -148,5 +163,19 @@ public class UploadServlet extends HttpServlet {
 		    }
 		
 		return fileNames;
+	}
+	
+	private String getRequester(String authHeader){
+		String retVal;
+		StringTokenizer tokenizer;
+		
+		retVal = authHeader.replaceFirst(AUTHORIZATION_HEADER_PREFIX, "");
+		retVal = Base64.decodeAsString(retVal);
+		
+		tokenizer = new StringTokenizer(retVal, ":");
+		
+		retVal = tokenizer.nextToken();
+		
+		return retVal;
 	}
 }

@@ -20,13 +20,20 @@ import javax.ws.rs.core.Response;
 @Path("/Files")
 public class FilesResource {
 
+	private static final String USERS_DIR_PATH = "C:/omri/study/sem8/security/codeJava/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/UploadServletApp/users";
+	
+	@Path("/{userName}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<String> getFileNames(){
+	public List<String> getFileNames(@PathParam("userName") String userName){
 		//will change to user specific directory
-		String dir = "C:/omri/study/sem8/security/codeJava/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/UploadServletApp/upload";
-		File folder = new File(dir);
-		File[] listOfFiles = folder.listFiles();
+		
+		File userFolder = new File(USERS_DIR_PATH + File.separator + userName);
+		if (!userFolder.exists()) {
+			userFolder.mkdir();
+		}
+		
+		File[] listOfFiles = userFolder.listFiles();
 		List<String> fileNames = new ArrayList<String>();
 		
 		//this loop fills the list of file names
@@ -44,9 +51,11 @@ public class FilesResource {
 	}
 	
 	@DELETE
-	@Path("/{fileName}")
-	public void deleteFile(@PathParam("fileName") String fileName){
-		String dir = "C:/omri/study/sem8/security/codeJava/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/UploadServletApp/upload";
+	@Path("/{userName}/{fileName}")
+	public void deleteFile(@PathParam("userName") String userName, @PathParam("fileName") String fileName){
+		
+		String dir = USERS_DIR_PATH + File.separator + userName;
+		
 		
 		try{
 			File file = new File(dir + "/" + fileName);

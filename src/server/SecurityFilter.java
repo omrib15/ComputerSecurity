@@ -37,7 +37,7 @@ public class SecurityFilter implements ContainerRequestFilter{
 				String authToken = authHeader.get(0);
 				authToken = authToken.replaceFirst(AUTHORIZATION_HEADER_PREFIX, "");
 				String decodedString = Base64.decodeAsString(authToken);
-				System.out.println("-----------decoded header value : " +decodedString );
+	
 				StringTokenizer tokenizer = new StringTokenizer(decodedString, ":");
 				
 				String username = tokenizer.nextToken();
@@ -77,7 +77,7 @@ public class SecurityFilter implements ContainerRequestFilter{
 	}*/
 
 	private int authenticate(String username , String password) {
-		System.out.println("<------>athenticat : username = " + username + " password = " + password);
+		
 		String userFilePath = "C:/omri/study/sem8/security/codeJava/Auth/users/users.txt";
 		File usersFile = new File(userFilePath);
 
@@ -125,19 +125,15 @@ public class SecurityFilter implements ContainerRequestFilter{
 		StringTokenizer tokenizer = new StringTokenizer(credentials, ",");
 		
 		String credUserName = tokenizer.nextToken();
-		System.out.println("credUserName = " + credUserName);
 		
 		String salt = tokenizer.nextToken();
-		System.out.println("salt = " + salt);
 		
 		String credPass = tokenizer.nextToken();
-		System.out.println("credPass = " + credPass);
 		
 		String hashedPassAndSalt = Hashing.sha256()
 				.hashString(password+salt, StandardCharsets.UTF_8)
 				.toString();
 		
-		System.out.println("hashedPassAndSalt : " + hashedPassAndSalt) ;
 		return (username.equals(credUserName) && credPass.equals(hashedPassAndSalt));
 	}
 

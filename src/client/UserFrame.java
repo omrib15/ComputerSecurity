@@ -238,7 +238,7 @@ PropertyChangeListener {
 
 			progressBar.setValue(0);
 
-			UploadTask upTask = new UploadTask(uploadUrl, uploadFile){
+			UploadTask upTask = new UploadTask(uploadUrl, uploadFile, authHeaderVal){
 				@Override
 				public void done() {
 					if (!isCancelled()) {
@@ -277,7 +277,8 @@ PropertyChangeListener {
 
 			//download the file to the selected destination
 			String fileName = (String) fileList.getSelectedValue();
-			String url = uploadUrl+"?fileName=" + fileName;
+			fileName = fileName.replaceAll(" ", ";");
+			String url = uploadUrl+"?fileName=" + fileName + "&username="+username;
 			System.out.println("get url : " +url);
 			HttpDownloadUtility.downloadFile(url, dest);
 		}
@@ -315,8 +316,10 @@ PropertyChangeListener {
 
 	private void sendDeleteRequest(String fileName){
 		Client client = ClientBuilder.newClient();
-
-		Response response = client.target("http://localhost:8080/UploadServletApp/webapi/Files/"+fileName)
+		
+		String deleteUrl = "http://localhost:8080/UploadServletApp/webapi/Files/"+username+"/"+fileName;
+		
+		Response response = client.target(deleteUrl)
 				.request().header("Authorization", authHeaderVal).delete();
 
 		int status = response.getStatus();
@@ -350,7 +353,7 @@ PropertyChangeListener {
 		Client client = ClientBuilder.newClient();
 
 		//send a get request and get the response
-		Response response = client.target("http://localhost:8080/UploadServletApp/webapi/Files")
+		Response response = client.target("http://localhost:8080/UploadServletApp/webapi/Files/" + username)
 				.request().header("Authorization", authHeaderVal).get();
 
 		ArrayList list = response.readEntity(ArrayList.class);

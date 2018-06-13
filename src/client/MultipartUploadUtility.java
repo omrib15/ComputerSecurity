@@ -31,7 +31,7 @@ public class MultipartUploadUtility {
      * @param charset
      * @throws IOException
      */
-    public MultipartUploadUtility(String requestURL, String charset)
+    public MultipartUploadUtility(String requestURL, String charset, String authHeaderVal)
             throws IOException {
  
         // creates a unique boundary based on time stamp
@@ -43,6 +43,7 @@ public class MultipartUploadUtility {
         httpConn.setDoInput(true);
         httpConn.setRequestProperty("Content-Type",
                 "multipart/form-data; boundary=" + boundary);
+        httpConn.setRequestProperty("Authorization", authHeaderVal);
         outputStream = httpConn.getOutputStream();
         writer = new PrintWriter(new OutputStreamWriter(outputStream, charset),
                 true);
@@ -80,6 +81,7 @@ public class MultipartUploadUtility {
     public void writeFileBytes(byte[] bytes, int offset, int length)
             throws IOException {
         outputStream.write(bytes, offset, length);
+        
     }
  
     /**
