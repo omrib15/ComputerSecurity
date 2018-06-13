@@ -33,6 +33,7 @@ import javax.ws.rs.core.Response;
 import org.glassfish.jersey.internal.util.Base64;
 
 import client.JFilePicker;
+import client.login.LoginFrame;
 
 
 /**
@@ -51,6 +52,7 @@ PropertyChangeListener {
 	private JButton buttonDownload = new JButton("Download");
 	private JButton buttonDelete = new JButton("Delete");
 	private JButton buttonRefresh = new JButton("Refresh");
+	private JButton buttonLogOut = new JButton("Logout");
 
 	private JProgressBar progressBar = new JProgressBar(0, 100);
 
@@ -111,6 +113,12 @@ PropertyChangeListener {
 				buttonRefreshActionPerformed(event);
 			}
 		});
+		
+		buttonLogOut.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				buttonLogOutActionPerformed(event);
+			}
+		});
 
 		//set some labels bold
 		Font upFont = labelUpload.getFont();
@@ -158,6 +166,11 @@ PropertyChangeListener {
 		constraints.gridy = 5;
 		constraints.anchor = GridBagConstraints.SOUTH;
 		add(buttonDelete, constraints);
+		
+		constraints.gridx = 0;
+		constraints.gridy = 6;
+		constraints.anchor = GridBagConstraints.WEST;
+		add(buttonLogOut, constraints);
 
 
 
@@ -321,6 +334,12 @@ PropertyChangeListener {
 	private void buttonRefreshActionPerformed(ActionEvent event){
 		updateFileList();
 
+	}
+	
+	private void buttonLogOutActionPerformed(ActionEvent event){
+		this.setVisible(false);
+		new LoginFrame("File manager").setVisible(true);
+		this.dispose();
 	}
 
 	/*

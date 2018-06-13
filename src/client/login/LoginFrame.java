@@ -34,7 +34,7 @@ public class LoginFrame extends JFrame{
 	private JPasswordField passwordText;
 	private JButton loginButton;
 	private JButton registerButton;
-	
+
 	private static final int PASSWORD_SECRET_NUM = 1;
 	private static final int ENCRYPTION_SECRET_NUM = 2;
 	private static final int AUTHENTICCATION_SECRET_NUM = 3;
@@ -48,19 +48,18 @@ public class LoginFrame extends JFrame{
 		passwordText = new JPasswordField(20);
 		loginButton = new JButton("login");
 		registerButton = new JButton("register");
+		this.setSize(300, 180);
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setLocation(750, 350);
+		JPanel panel = new JPanel();
+		this.add(panel);
+		this.placeComponents(panel);
 		setActionListeners();
 
 	}
 
 	public static void main(String[] args) {
 		LoginFrame loginFrame = new LoginFrame("File manager");
-		loginFrame.setSize(300, 180);
-		loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		loginFrame.setLocation(750, 350);
-
-		JPanel panel = new JPanel();
-		loginFrame.add(panel);
-		loginFrame.placeComponents(panel);
 
 		loginFrame.setVisible(true);
 	}
@@ -106,35 +105,40 @@ public class LoginFrame extends JFrame{
 	private void buttonLoginActionPerformed(ActionEvent event){
 		String username = userText.getText();
 		String pass = extractPass(passwordText)+PASSWORD_SECRET_NUM;
-		String hashedPass = Hashing.sha256()
-				.hashString(pass, StandardCharsets.UTF_8)
-				.toString();
-		
-		Client client = ClientBuilder.newClient();
-		
-		String authHeaderVal = "Basic " + Base64.encodeAsString(username + ":"+hashedPass);
-				
-		Response response = client.target("http://localhost:8080/UploadServletApp/webapi/login")
-				.request().header("Authorization", authHeaderVal).get();
-		
-		if(response.readEntity(String.class).equals("login successful")){
-			JOptionPane.showMessageDialog(this, "login successful",
-					"Success", JOptionPane.INFORMATION_MESSAGE);
-			
-			openUserFrame(authHeaderVal, username);
-			this.setVisible(false);
-		} 
-		
-		else {
-			JOptionPane.showMessageDialog(this, "username or password incorrect",
-					"Error", JOptionPane.ERROR_MESSAGE);
+		if(checkLength(username,pass.substring(0, pass.length()-1))){ 
+			String hashedPass = Hashing.sha256()
+					.hashString(pass, StandardCharsets.UTF_8)
+					.toString();
+
+			Client client = ClientBuilder.newClient();
+
+			String authHeaderVal = "Basic " + Base64.encodeAsString(username + ":"+hashedPass);
+
+			Response response = client.target("http://localhost:8080/UploadServletApp/webapi/login")
+					.request().header("Authorization", authHeaderVal).get();
+
+			if(response.readEntity(String.class).equals("login successful")){
+				JOptionPane.showMessageDialog(this, "login successful",
+						"Success", JOptionPane.INFORMATION_MESSAGE);
+
+				openUserFrame(authHeaderVal, username);
+				this.setVisible(false);
+				this.dispose();
+			} 
+
+			else {
+				JOptionPane.showMessageDialog(this, "username or password incorrect",
+						"Error", JOptionPane.ERROR_MESSAGE);
+			}
 		}
-		
-		
+
+
+
+
 	}
 
 	private void buttonRegisterActionPerformed(ActionEvent event){
-		
+
 		String username = userText.getText();
 		String pass = extractPass(passwordText)+PASSWORD_SECRET_NUM;
 		String hashedPass = Hashing.sha256()
@@ -143,34 +147,34 @@ public class LoginFrame extends JFrame{
 
 
 		UserCredentials credentials = new UserCredentials(username, hashedPass);
-		
+
 		if(checkLength(username,pass)){
-			
+
 			sendRegistrationRequest(credentials);	
 		}
 	}
 
 	private void sendRegistrationRequest(UserCredentials credentials){
-		
+
 		Client client = ClientBuilder.newClient();
 		//send a get request and get the response
 		//String body1 = "{\"username\":\""+credentials.getUsername()+"\",\"password\":\""+credentials.getPassword()+"\"}";
 		String body = credentials.getUsername()+"."+credentials.getPassword();
 		Response response = client.target("http://localhost:8080/UploadServletApp/webapi/registration")
 				.request().post(Entity.json(body));
-		
+
 		if(response.getStatus() >=  200 && response.getStatus() < 300){
 			JOptionPane.showMessageDialog(this, "Registration was successful",
 					"Success", JOptionPane.INFORMATION_MESSAGE);
-			
+
 		}
-		
+
 		else{
 			JOptionPane.showMessageDialog(this, "Could not register",
 					"Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
-	
+
 	private String extractPass(JPasswordField passObj){
 		char[] passC = passObj.getPassword();
 		String retVal="";
@@ -201,7 +205,7 @@ public class LoginFrame extends JFrame{
 
 		return ans;
 	}
-	
+
 	private void openUserFrame(final String authHeaderVal, final String username){
 		try {
 			// set look and feel to system dependent
@@ -214,6 +218,7 @@ public class LoginFrame extends JFrame{
 			public void run() {
 				try {
 					new UserFrame(authHeaderVal,username).setVisible(true);
+
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -222,6 +227,6 @@ public class LoginFrame extends JFrame{
 		});
 	}
 
-	
+
 
 }
