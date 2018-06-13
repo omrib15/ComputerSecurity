@@ -30,7 +30,10 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.internal.util.Base64;
+
 import client.JFilePicker;
+import client.login.LoginFrame;
 
 
 /**
@@ -39,6 +42,9 @@ import client.JFilePicker;
  */
 public class UserFrame extends JFrame implements
 PropertyChangeListener {
+	private String authHeaderVal;
+	private String username;
+	
 	private JFilePicker filePicker = new JFilePicker("Choose a file: ", "Browse");
 	private JFileChooser dirChooser = new JFileChooser();
 
@@ -46,6 +52,7 @@ PropertyChangeListener {
 	private JButton buttonDownload = new JButton("Download");
 	private JButton buttonDelete = new JButton("Delete");
 	private JButton buttonRefresh = new JButton("Refresh");
+	private JButton buttonLogOut = new JButton("Logout");
 
 	private JProgressBar progressBar = new JProgressBar(0, 100);
 
@@ -62,9 +69,12 @@ PropertyChangeListener {
 
 
 
-	public UserFrame() throws IOException {
+	public UserFrame(String authHeaderVal, String username) throws IOException {
 		super("Swing File Upload to HTTP server");
-
+		
+		this.authHeaderVal = authHeaderVal;
+		this.username = username;
+		
 		// set up layout
 		setLayout(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
@@ -101,6 +111,12 @@ PropertyChangeListener {
 		buttonRefresh.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				buttonRefreshActionPerformed(event);
+			}
+		});
+		
+		buttonLogOut.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				buttonLogOutActionPerformed(event);
 			}
 		});
 
@@ -150,6 +166,11 @@ PropertyChangeListener {
 		constraints.gridy = 5;
 		constraints.anchor = GridBagConstraints.SOUTH;
 		add(buttonDelete, constraints);
+		
+		constraints.gridx = 0;
+		constraints.gridy = 6;
+		constraints.anchor = GridBagConstraints.WEST;
+		add(buttonLogOut, constraints);
 
 
 
@@ -296,7 +317,7 @@ PropertyChangeListener {
 		Client client = ClientBuilder.newClient();
 
 		Response response = client.target("http://localhost:8080/UploadServletApp/webapi/Files/"+fileName)
-				.request().delete();
+				.request().header("Authorization", authHeaderVal).delete();
 
 		int status = response.getStatus();
 
@@ -314,6 +335,12 @@ PropertyChangeListener {
 		updateFileList();
 
 	}
+	
+	private void buttonLogOutActionPerformed(ActionEvent event){
+		this.setVisible(false);
+		new LoginFrame("File manager").setVisible(true);
+		this.dispose();
+	}
 
 	/*
 	 * updates the list of file names with file names from server
@@ -324,7 +351,7 @@ PropertyChangeListener {
 
 		//send a get request and get the response
 		Response response = client.target("http://localhost:8080/UploadServletApp/webapi/Files")
-				.request().get();
+				.request().header("Authorization", authHeaderVal).get();
 
 		ArrayList list = response.readEntity(ArrayList.class);
 
@@ -358,7 +385,7 @@ PropertyChangeListener {
 	/**
 	 * Launch the application
 	 */
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		try {
 			// set look and feel to system dependent
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -376,5 +403,5 @@ PropertyChangeListener {
 				}
 			}
 		});
-	}
+	}*/
 }
