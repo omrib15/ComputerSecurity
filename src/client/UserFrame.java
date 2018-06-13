@@ -30,6 +30,8 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.internal.util.Base64;
+
 import client.JFilePicker;
 
 
@@ -39,6 +41,9 @@ import client.JFilePicker;
  */
 public class UserFrame extends JFrame implements
 PropertyChangeListener {
+	private String authHeaderVal;
+	private String username;
+	
 	private JFilePicker filePicker = new JFilePicker("Choose a file: ", "Browse");
 	private JFileChooser dirChooser = new JFileChooser();
 
@@ -62,9 +67,12 @@ PropertyChangeListener {
 
 
 
-	public UserFrame() throws IOException {
+	public UserFrame(String authHeaderVal, String username) throws IOException {
 		super("Swing File Upload to HTTP server");
-
+		
+		this.authHeaderVal = authHeaderVal;
+		this.username = username;
+		
 		// set up layout
 		setLayout(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
@@ -296,7 +304,7 @@ PropertyChangeListener {
 		Client client = ClientBuilder.newClient();
 
 		Response response = client.target("http://localhost:8080/UploadServletApp/webapi/Files/"+fileName)
-				.request().delete();
+				.request().header("Authorization", authHeaderVal).delete();
 
 		int status = response.getStatus();
 
@@ -324,7 +332,7 @@ PropertyChangeListener {
 
 		//send a get request and get the response
 		Response response = client.target("http://localhost:8080/UploadServletApp/webapi/Files")
-				.request().get();
+				.request().header("Authorization", authHeaderVal).get();
 
 		ArrayList list = response.readEntity(ArrayList.class);
 
@@ -358,7 +366,7 @@ PropertyChangeListener {
 	/**
 	 * Launch the application
 	 */
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		try {
 			// set look and feel to system dependent
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -376,5 +384,5 @@ PropertyChangeListener {
 				}
 			}
 		});
-	}
+	}*/
 }

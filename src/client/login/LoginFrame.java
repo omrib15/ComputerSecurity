@@ -2,9 +2,8 @@ package client.login;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
-import java.util.Random;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -13,10 +12,19 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
 
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
+import org.glassfish.jersey.internal.util.Base64;
 
 import com.google.common.hash.Hashing;
+
+import client.UserFrame;
+
 
 public class LoginFrame extends JFrame{
 
@@ -26,6 +34,10 @@ public class LoginFrame extends JFrame{
 	private JPasswordField passwordText;
 	private JButton loginButton;
 	private JButton registerButton;
+	
+	private static final int PASSWORD_SECRET_NUM = 1;
+	private static final int ENCRYPTION_SECRET_NUM = 2;
+	private static final int AUTHENTICCATION_SECRET_NUM = 3;
 
 	public LoginFrame(String name){
 		super(name);
@@ -42,7 +54,7 @@ public class LoginFrame extends JFrame{
 
 	public static void main(String[] args) {
 		LoginFrame loginFrame = new LoginFrame("File manager");
-		loginFrame.setSize(300, 150);
+		loginFrame.setSize(300, 180);
 		loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		loginFrame.setLocation(750, 350);
 
@@ -92,25 +104,73 @@ public class LoginFrame extends JFrame{
 	}
 
 	private void buttonLoginActionPerformed(ActionEvent event){
-
+		String username = userText.getText();
+		String pass = extractPass(passwordText)+PASSWORD_SECRET_NUM;
+		String hashedPass = Hashing.sha256()
+				.hashString(pass, StandardCharsets.UTF_8)
+				.toString();
+		
+		Client client = ClientBuilder.newClient();
+		
+		String authHeaderVal = "Basic " + Base64.encodeAsString(username + ":"+hashedPass);
+				
+		Response response = client.target("http://localhost:8080/UploadServletApp/webapi/login")
+				.request().header("Authorization", authHeaderVal).get();
+		
+		if(response.readEntity(String.class).equals("login successful")){
+			JOptionPane.showMessageDialog(this, "login successful",
+					"Success", JOptionPane.INFORMATION_MESSAGE);
+			
+			openUserFrame(authHeaderVal, username);
+			this.setVisible(false);
+		} 
+		
+		else {
+			JOptionPane.showMessageDialog(this, "username or password incorrect",
+					"Error", JOptionPane.ERROR_MESSAGE);
+		}
+		
+		
 	}
 
 	private void buttonRegisterActionPerformed(ActionEvent event){
+		
+		String username = userText.getText();
+		String pass = extractPass(passwordText)+PASSWORD_SECRET_NUM;
+		String hashedPass = Hashing.sha256()
+				.hashString(pass, StandardCharsets.UTF_8)
+				.toString();
 
-		String stringedPass = extractPass(passwordText);
-		String hashedPass = "";
 
-		if(checkLength()){
-			//use SHA-256 to hash the password before sending it to the server
-			hashedPass = Hashing.sha256()
-					.hashString(stringedPass, StandardCharsets.UTF_8)
-					.toString();
+		UserCredentials credentials = new UserCredentials(username, hashedPass);
+		
+		if(checkLength(username,pass)){
 			
-			//send user name and hashedpass to the registration resource
-			
+			sendRegistrationRequest(credentials);	
 		}
 	}
 
+	private void sendRegistrationRequest(UserCredentials credentials){
+		
+		Client client = ClientBuilder.newClient();
+		//send a get request and get the response
+		//String body1 = "{\"username\":\""+credentials.getUsername()+"\",\"password\":\""+credentials.getPassword()+"\"}";
+		String body = credentials.getUsername()+"."+credentials.getPassword();
+		Response response = client.target("http://localhost:8080/UploadServletApp/webapi/registration")
+				.request().post(Entity.json(body));
+		
+		if(response.getStatus() >=  200 && response.getStatus() < 300){
+			JOptionPane.showMessageDialog(this, "Registration was successful",
+					"Success", JOptionPane.INFORMATION_MESSAGE);
+			
+		}
+		
+		else{
+			JOptionPane.showMessageDialog(this, "Could not register",
+					"Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
 	private String extractPass(JPasswordField passObj){
 		char[] passC = passObj.getPassword();
 		String retVal="";
@@ -122,17 +182,17 @@ public class LoginFrame extends JFrame{
 		return retVal;
 	}
 
-	private boolean checkLength(){
+	private boolean checkLength(String username,String pass){
 		boolean ans = true;
 
-		if(userText.getText().length() < 6){
+		if(username.length() < 6){
 			ans = false;
 			JOptionPane.showMessageDialog(this,
 					"user name must be at least 6 characters long " , "",
 					JOptionPane.INFORMATION_MESSAGE);
 		}
 
-		else if(passwordText.getPassword().length < 6){
+		else if(pass.length() < 6){
 			ans = false;
 			JOptionPane.showMessageDialog(this,
 					"password must be at least 6 characters long " , "",
@@ -140,6 +200,26 @@ public class LoginFrame extends JFrame{
 		}
 
 		return ans;
+	}
+	
+	private void openUserFrame(final String authHeaderVal, final String username){
+		try {
+			// set look and feel to system dependent
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					new UserFrame(authHeaderVal,username).setVisible(true);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 
 	
