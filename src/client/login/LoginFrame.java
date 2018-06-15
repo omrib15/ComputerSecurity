@@ -104,10 +104,10 @@ public class LoginFrame extends JFrame{
 
 	private void buttonLoginActionPerformed(ActionEvent event){
 		String username = userText.getText();
-		String pass = extractPass(passwordText)+PASSWORD_SECRET_NUM;
-		if(checkLength(username,pass.substring(0, pass.length()-1))){ 
+		String pass = extractPass(passwordText);
+		if(checkLength(username,pass)){ 
 			String hashedPass = Hashing.sha256()
-					.hashString(pass, StandardCharsets.UTF_8)
+					.hashString(pass+PASSWORD_SECRET_NUM, StandardCharsets.UTF_8)
 					.toString();
 
 			Client client = ClientBuilder.newClient();
@@ -140,9 +140,9 @@ public class LoginFrame extends JFrame{
 	private void buttonRegisterActionPerformed(ActionEvent event){
 
 		String username = userText.getText();
-		String pass = extractPass(passwordText)+PASSWORD_SECRET_NUM;
+		String pass = extractPass(passwordText) ;
 		String hashedPass = Hashing.sha256()
-				.hashString(pass, StandardCharsets.UTF_8)
+				.hashString(pass+PASSWORD_SECRET_NUM, StandardCharsets.UTF_8)
 				.toString();
 
 
@@ -158,7 +158,6 @@ public class LoginFrame extends JFrame{
 
 		Client client = ClientBuilder.newClient();
 		//send a get request and get the response
-		//String body1 = "{\"username\":\""+credentials.getUsername()+"\",\"password\":\""+credentials.getPassword()+"\"}";
 		String body = credentials.getUsername()+"."+credentials.getPassword();
 		Response response = client.target("http://localhost:8080/UploadServletApp/webapi/registration")
 				.request().post(Entity.json(body));

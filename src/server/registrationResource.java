@@ -1,6 +1,6 @@
 package server;
 
-import java.io.File;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -12,13 +12,10 @@ import java.util.StringTokenizer;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
 import com.google.common.hash.Hashing;
 
-import jdk.nashorn.internal.scripts.JS;
-import user.UserCredentials;
+
 
 @Path("/registration")
 public class registrationResource {
