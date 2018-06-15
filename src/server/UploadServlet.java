@@ -52,7 +52,6 @@ public class UploadServlet extends HttpServlet {
 		}
 		
 		requestUsername = getRequester(request.getHeader("Authorization"));
-		System.out.println("---------requestUsername = " + requestUsername);
 		
 		// configures upload settings
 		DiskFileItemFactory factory = new DiskFileItemFactory();
@@ -73,7 +72,7 @@ public class UploadServlet extends HttpServlet {
 			uploadDir.mkdir();
 		}
 		
-		uploadPath += File.separator + requestUsername; 
+		uploadPath += "/" + requestUsername; 
 		uploadDir = new File(uploadPath);
 		if (!uploadDir.exists()) {
 			uploadDir.mkdir();
@@ -87,17 +86,21 @@ public class UploadServlet extends HttpServlet {
 			// iterates over form's fields
 			while (iter.hasNext()) {
 				FileItem item = (FileItem) iter.next();
+				System.out.println("<><><><><><><><><<>");
 				// processes only fields that are not form fields
 				if (!item.isFormField()) {
-					String fileName = new File(item.getName()).getName();
+					String fileName = (new File(item.getName())).getName();
 					System.out.println("fileName = " + fileName);
-					String filePath = uploadPath + File.separator + fileName;
+					String filePath = uploadPath + "/" + fileName;
 					File storeFile = new File(filePath);
 					
 					// saves the file on disk
 					item.write(storeFile);
+					System.out.println("???????? StoreFile.length() = " + storeFile.length());
 				}
 			}
+			
+			
 			request.setAttribute("message", "Upload has been done successfully!");
 			System.out.println(" - - - - -response status = = = = " +response.getStatus());
 		} catch (Exception ex) {

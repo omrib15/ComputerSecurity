@@ -54,7 +54,7 @@ public class FilesResource {
 	@Path("/{userName}/{fileName}")
 	public void deleteFile(@PathParam("userName") String userName, @PathParam("fileName") String fileName){
 		
-		String dir = USERS_DIR_PATH + File.separator + userName;
+		String dir = USERS_DIR_PATH + "/" + userName;
 		
 		
 		try{

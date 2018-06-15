@@ -7,7 +7,8 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
- 
+import java.util.Base64;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -42,7 +43,7 @@ public class CryptoUtils {
             FileInputStream inputStream = new FileInputStream(inputFile);
             byte[] inputBytes = new byte[(int) inputFile.length()];
             inputStream.read(inputBytes);
-             
+            //byte[] base64decodedTokenArr = Base64.getDecoder().decode(inputBytes);
             byte[] outputBytes = cipher.doFinal(inputBytes);
              
             FileOutputStream outputStream = new FileOutputStream(outputFile);

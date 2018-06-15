@@ -38,6 +38,7 @@ public class UploadTask extends SwingWorker<Void, Integer> {
             long totalBytesRead = 0;
             int percentCompleted = 0;
             long fileSize = uploadFile.length();
+        
  
             while ((bytesRead = inputStream.read(buffer)) != -1) {
                 util.writeFileBytes(buffer, 0, bytesRead);
@@ -46,7 +47,7 @@ public class UploadTask extends SwingWorker<Void, Integer> {
                 setProgress(percentCompleted);
             }
             
-            inputStream.close();
+             inputStream.close();
             util.finish();
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(null, "Error uploading file: " + ex.getMessage(),
