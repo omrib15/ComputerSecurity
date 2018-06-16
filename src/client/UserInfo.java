@@ -14,6 +14,7 @@ public class UserInfo {
 	private String username;
 	private String masterSecret;
 	private String authHeaderVal;
+
 	private String derivedPass;
 	private String encKey;
 	private String authKey;
@@ -23,7 +24,7 @@ public class UserInfo {
 		this.masterSecret = masterSecret;
 		derivedPass = deriveSecret(PASSWORD_SECRET_NUM);
 		authHeaderVal = "Basic " + Base64.encodeAsString(username + ":"+derivedPass);
-		encKey = deriveSecret(ENCRYPTION_SECRET_NUM);
+		encKey = deriveSecret(ENCRYPTION_SECRET_NUM).substring(0,16);
 		authKey = deriveSecret(AUTHENTICCATION_SECRET_NUM);
 	}
 	
@@ -74,5 +75,12 @@ public class UserInfo {
 		this.authKey = authKey;
 	}
 
+	public String getAuthHeaderVal() {
+		return authHeaderVal;
+	}
+
+	public void setAuthHeaderVal(String authHeaderVal) {
+		this.authHeaderVal = authHeaderVal;
+	}
 	
 }

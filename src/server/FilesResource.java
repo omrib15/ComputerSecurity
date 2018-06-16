@@ -54,7 +54,7 @@ public class FilesResource {
 	@Path("/{userName}/{fileName}")
 	public void deleteFile(@PathParam("userName") String userName, @PathParam("fileName") String fileName){
 		
-		String dir = USERS_DIR_PATH + File.separator + userName;
+		String dir = USERS_DIR_PATH + "/" + userName;
 		
 		
 		try{
@@ -64,7 +64,7 @@ public class FilesResource {
 			if(file.delete()){
 				System.out.println(file.getName() + " is deleted!");
 			}else{
-				System.out.println("Delete operation is failed.");
+				System.out.println("Delete operation has failed.");
 			}
 
 		}catch(Exception e){

@@ -24,6 +24,7 @@ import org.glassfish.jersey.internal.util.Base64;
 import com.google.common.hash.Hashing;
 
 import client.UserFrame;
+import client.UserInfo;
 
 
 public class LoginFrame extends JFrame{
@@ -105,23 +106,26 @@ public class LoginFrame extends JFrame{
 	private void buttonLoginActionPerformed(ActionEvent event){
 		String username = userText.getText();
 		String pass = extractPass(passwordText);
+		UserInfo user = new UserInfo(username,pass);
+		
 		if(checkLength(username,pass)){ 
-			String hashedPass = Hashing.sha256()
+			/*String hashedPass = Hashing.sha256()
 					.hashString(pass+PASSWORD_SECRET_NUM, StandardCharsets.UTF_8)
 					.toString();
-
+			*/
 			Client client = ClientBuilder.newClient();
 
-			String authHeaderVal = "Basic " + Base64.encodeAsString(username + ":"+hashedPass);
+			//String authHeaderVal = "Basic " + Base64.encodeAsString(username + ":"+hashedPass);
 
 			Response response = client.target("http://localhost:8080/UploadServletApp/webapi/login")
-					.request().header("Authorization", authHeaderVal).get();
+					.request().header("Authorization", user.getAuthHeaderVal()).get();
 
 			if(response.readEntity(String.class).equals("login successful")){
 				JOptionPane.showMessageDialog(this, "login successful",
 						"Success", JOptionPane.INFORMATION_MESSAGE);
 
-				openUserFrame(authHeaderVal, username);
+				//openUserFrame(user.getAuthHeaderVal(), username);
+				openUserFrame(user);
 				this.setVisible(false);
 				this.dispose();
 			} 
@@ -205,7 +209,7 @@ public class LoginFrame extends JFrame{
 		return ans;
 	}
 
-	private void openUserFrame(final String authHeaderVal, final String username){
+	private void openUserFrame(final UserInfo user){
 		try {
 			// set look and feel to system dependent
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -216,7 +220,7 @@ public class LoginFrame extends JFrame{
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					new UserFrame(authHeaderVal,username).setVisible(true);
+					new UserFrame(user).setVisible(true);
 
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
