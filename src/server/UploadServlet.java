@@ -113,7 +113,7 @@ public class UploadServlet extends HttpServlet {
 	 * handles file downloads
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String fileName = request.getParameter("fileName").replaceAll(";", " ");
+		String fileName = request.getParameter("fileName");
 		String username = request.getParameter("username");
 		
 		System.out.println("trying to get file : "+ fileName);
