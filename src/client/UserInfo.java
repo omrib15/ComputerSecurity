@@ -24,6 +24,7 @@ public class UserInfo {
 		this.masterSecret = masterSecret;
 		derivedPass = deriveSecret(PASSWORD_SECRET_NUM);
 		authHeaderVal = "Basic " + Base64.encodeAsString(username + ":"+derivedPass);
+		//taking the first 16 characters of the derived encryption key, because we use AES 128 for encryption
 		encKey = deriveSecret(ENCRYPTION_SECRET_NUM).substring(0,16);
 		authKey = deriveSecret(AUTHENTICCATION_SECRET_NUM);
 	}
