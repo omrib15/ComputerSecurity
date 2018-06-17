@@ -14,12 +14,12 @@ import javax.swing.SwingWorker;
 public class UploadTask extends SwingWorker<Void, Integer> {
     private String uploadURL;
     private File uploadFile;
-    private String authHeaderVal;
+    private UserInfo user;
     
-    public UploadTask(String uploadURL, File uploadFile,String authHeaderVal) {
+    public UploadTask(String uploadURL, File uploadFile, UserInfo user) {
         this.uploadURL = uploadURL;
         this.uploadFile = uploadFile;
-        this.authHeaderVal = authHeaderVal;
+        this.user = user;
     }
  
     /**
@@ -29,7 +29,7 @@ public class UploadTask extends SwingWorker<Void, Integer> {
     protected Void doInBackground() throws Exception {
         try {
             MultipartUploadUtility util = new MultipartUploadUtility(uploadURL,
-                    "UTF-8",authHeaderVal);
+                    "UTF-8", user, uploadFile);
             util.addFilePart("uploadFile", uploadFile);
  
             FileInputStream inputStream = new FileInputStream(uploadFile);

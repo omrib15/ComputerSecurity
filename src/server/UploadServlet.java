@@ -40,6 +40,10 @@ public class UploadServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		
+		System.out.println("DDDDDDDDDDDDD request.getHeader(Authorization) = " + request.getHeader("Authorization"));
+		System.out.println("DDDDDDDDDDDDD request.getHeader(Content-Type) = " + request.getHeader("Content-Type"));
+		System.out.println("DDDDDDDDDDDDD request.getHeader(MAC) = " + request.getHeader("MAC"));
+		
 		String requestUsername;
 		
 		// checks if the request actually contains upload file

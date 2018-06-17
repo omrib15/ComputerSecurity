@@ -223,8 +223,10 @@ PropertyChangeListener {
 	private void buttonUploadActionPerformed(ActionEvent event) {
 		
 		String filePath = filePicker.getSelectedFilePath();
+		
 		//create a temporary encrypted file in the same directory 
 		String fileName = filePath.substring(filePath.lastIndexOf("\\")+1 , filePath.length());
+		
 		//the encrypted file name
 		String encFileName = CryptoUtils.encryptString(user.getEncKey(), fileName);
 		String decFileName = CryptoUtils.decryptString(user.getEncKey(), encFileName);
@@ -246,7 +248,7 @@ PropertyChangeListener {
 					JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-
+		
 		File selectedFile = new File(filePath);
 		final File encryptedFile = new File(encFilePath);
 		final File encryptedFilePath = new File(encryptedFile.getAbsolutePath().substring(0 , encryptedFile.getAbsolutePath().indexOf(fileName)) + encFileName);
@@ -258,7 +260,7 @@ PropertyChangeListener {
 					
 			progressBar.setValue(0);
 
-			UploadTask upTask = new UploadTask(uploadUrl, encryptedFilePath, user.getAuthHeaderVal()){
+			UploadTask upTask = new UploadTask(uploadUrl, encryptedFilePath, user){
 				@Override
 				public void done() {
 					if (!isCancelled()) {
@@ -411,6 +413,8 @@ PropertyChangeListener {
 		//send a get request and get the response
 		Response response = client.target("http://localhost:8080/UploadServletApp/webapi/Files/" + user.getUsername())
 				.request().header("Authorization", user.getAuthHeaderVal()).get();
+		
+		System.out.println("MMMMMMMMMMM  authHeaderVal = " + user.getAuthHeaderVal());
 
 		ArrayList list = response.readEntity(ArrayList.class);
 
