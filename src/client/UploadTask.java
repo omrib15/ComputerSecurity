@@ -49,6 +49,7 @@ public class UploadTask extends SwingWorker<Void, Integer> {
             
              inputStream.close();
             util.finish();
+            
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(null, "Error uploading file: " + ex.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);           

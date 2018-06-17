@@ -13,6 +13,9 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
@@ -36,6 +39,7 @@ import client.JFilePicker;
 import client.encryption.CryptoException;
 import client.encryption.CryptoUtils;
 import client.login.LoginFrame;
+import sun.misc.BASE64Decoder;
 
 
 /**
@@ -221,20 +225,20 @@ PropertyChangeListener {
 	 * handle click event of the Upload button
 	 */
 	private void buttonUploadActionPerformed(ActionEvent event) {
-		
+
 		String filePath = filePicker.getSelectedFilePath();
-		
+
 		//create a temporary encrypted file in the same directory 
 		String fileName = filePath.substring(filePath.lastIndexOf("\\")+1 , filePath.length());
-		
+
 		//the encrypted file name
 		String encFileName = CryptoUtils.encryptString(user.getEncKey(), fileName);
 		String decFileName = CryptoUtils.decryptString(user.getEncKey(), encFileName);
 		System.out.println("<><><>< Upload: fileName: " +fileName + " encFileName : " +encFileName+ " decFileName " + decFileName);
-		
+
 		//String encFilePath = filePath.substring(0 , filePath.lastIndexOf("\\")) + "/" +encFileName ;
 		String encFilePath = filePath+".encrypted";
-		
+
 		//validate server url
 		if(uploadUrl.equals("")){
 			JOptionPane.showMessageDialog(this, "Please enter upload URL!",
@@ -248,16 +252,16 @@ PropertyChangeListener {
 					JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		
+
 		File selectedFile = new File(filePath);
 		final File encryptedFile = new File(encFilePath);
 		final File encryptedFilePath = new File(encryptedFile.getAbsolutePath().substring(0 , encryptedFile.getAbsolutePath().indexOf(fileName)) + encFileName);
-		
+
 		try {
 			//encrypt the file
 			CryptoUtils.encrypt(user.getEncKey(), selectedFile, encryptedFile);
 			System.out.println(encryptedFile.renameTo(encryptedFilePath));
-					
+
 			progressBar.setValue(0);
 
 			UploadTask upTask = new UploadTask(uploadUrl, encryptedFilePath, user){
@@ -271,10 +275,13 @@ PropertyChangeListener {
 						JOptionPane.showMessageDialog(null,
 								"File has been uploaded successfully!", "Message",
 								JOptionPane.INFORMATION_MESSAGE);
+
+
 					}
 					//dont forget to delete the temporary encrypted file
-					encryptedFile.delete();
-					encryptedFilePath.delete();
+					//System.out.println("trying to delete "+encryptedFile +encryptedFile.delete());
+					System.out.println("trying to delete "+encryptedFilePath.getAbsolutePath()+" " +encryptedFilePath.delete());
+
 
 				}
 			};
@@ -282,14 +289,18 @@ PropertyChangeListener {
 			upTask.addPropertyChangeListener(this);
 			//perform the upload task
 			upTask.execute();
-			
+
 		} catch (Exception ex) {
 			JOptionPane.showMessageDialog(this,
 					"Error executing upload task: " + ex.getMessage(), "Error",
 					JOptionPane.ERROR_MESSAGE);
 			//dont forget to delete the temporary encrypted file
-			encryptedFile.delete();
+			//encryptedFile.delete();
+			encryptedFilePath.delete();
 		}
+
+
+
 	}
 
 	/**
@@ -306,23 +317,23 @@ PropertyChangeListener {
 			String fileName = (String) fileList.getSelectedValue();
 			//fileName = fileName.replaceAll(" ", ";");
 			String encFileName = CryptoUtils.encryptString(user.getEncKey(), fileName);
-			
+
 			String url = uploadUrl+"?fileName=" + encFileName + "&username="+user.getUsername();
 			System.out.println("get url : " +url);
 			HttpDownloadUtility.downloadFile(url, dest);
-			
+
 			File downloadedFile = new File(dest+"/"+encFileName);
-			
+
 			//using randomAccessFile to strip last two bytes of the file (the line feed an boundary added by the multipartUploadUtility)
 			RandomAccessFile file = new RandomAccessFile(downloadedFile,"rwd");
-			
+
 			file.setLength(downloadedFile.length()-2);
-			
+
 			System.out.println("downloaded "+ downloadedFile.getName()+ " from server with length = " + downloadedFile.length());
-			
+
 			File decryptedFile = new File(dest+"/"+fileName);
-					//.replaceAll(".encrypted", "") );
-			
+			//.replaceAll(".encrypted", "") );
+
 
 			try {
 				CryptoUtils.decrypt(user.getEncKey(), downloadedFile, decryptedFile);
@@ -330,7 +341,7 @@ PropertyChangeListener {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 			file.close();
 			downloadedFile.delete();
 			System.out.println("user.getEncKey() = " +user.getEncKey());
@@ -349,7 +360,7 @@ PropertyChangeListener {
 
 		String fileName = (String) fileList.getSelectedValue();
 		String encFileName = CryptoUtils.encryptString(user.getEncKey(), fileName);
-		
+
 		System.out.println("!@#!@#!@# fileName = " + fileName );
 		if(fileName != null){
 			//prompt a user confirmation
@@ -413,24 +424,44 @@ PropertyChangeListener {
 		//send a get request and get the response
 		Response response = client.target("http://localhost:8080/UploadServletApp/webapi/Files/" + user.getUsername())
 				.request().header("Authorization", user.getAuthHeaderVal()).get();
-		
+
 		System.out.println("MMMMMMMMMMM  authHeaderVal = " + user.getAuthHeaderVal());
 
 		ArrayList list = response.readEntity(ArrayList.class);
 
 		//clear the list
 		fileListModel.clear();
-
+		
 		//update the list
 		for(int i = 0; i < list.size() ; i++){
 			String fileName = (String) list.get(i);
-			System.out.println(">>> UpdateFileList fileName = " + fileName);
-			//decrypt file names
-			String decFileName = CryptoUtils.decryptString(user.getEncKey(), fileName);
-			System.out.println(">>> UpdateFileList decFileName = " + decFileName);
-			//prevent duplicates
-			if(!fileListModel.contains(decFileName)){
-				fileListModel.addElement(decFileName);
+			
+			if(fileName.equals("Warning: file size changed on server")){
+				JOptionPane.showMessageDialog(this, fileName,
+						"Error", JOptionPane.ERROR_MESSAGE);
+				
+			}
+
+			else if(fileName.equals("Warning: authentication file deleted from server")){
+				JOptionPane.showMessageDialog(this, fileName,
+						"Error", JOptionPane.ERROR_MESSAGE);
+			}
+
+			else if(fileName.equals("Warning: file name has changed on server")){
+				JOptionPane.showMessageDialog(this, fileName,
+						"Error", JOptionPane.ERROR_MESSAGE);
+			}
+			
+			else{
+
+				System.out.println(">>> UpdateFileList fileName = " + fileName);
+				//decrypt file names
+				String decFileName = CryptoUtils.decryptString(user.getEncKey(), fileName);
+				System.out.println(">>> UpdateFileList decFileName = " + decFileName);
+				//prevent duplicates
+				if(!fileListModel.contains(decFileName)){
+					fileListModel.addElement(decFileName);
+				}
 			}
 		}
 
@@ -452,23 +483,4 @@ PropertyChangeListener {
 	/**
 	 * Launch the application
 	 */
-	/*public static void main(String[] args) {
-		try {
-			// set look and feel to system dependent
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					new UserFrame().setVisible(true);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		});
-	}*/
-}
+	}

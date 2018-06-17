@@ -25,9 +25,8 @@ public class authUtil {
 			FileInputStream in = new FileInputStream(file);
 			byte[] macb = processFile(mac, in);
 			String encoded = new BASE64Encoder().encode(macb);
-			
+			in.close();
 			System.out.println(file + ": " + encoded + " macb :" + macb);
-			
 			return encoded;
 		}
 

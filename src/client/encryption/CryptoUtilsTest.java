@@ -2,8 +2,13 @@ package client.encryption;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.Key;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -19,15 +24,18 @@ public class CryptoUtilsTest {
 	public static void main(String[] args) {
 		String key = "5a7127b8915a15287ed7a3da0e65378964e5babdfd0579ad399551ce49099849".substring(0, 32);
 
-		File inputFile = new File("C:/omri/before.txt");
+		File inputFile = new File("C:/omri/0b.txt");
 		File encryptedFile = new File("C:/omri/kesem.txt");
 		File decryptedFile = new File("C:/omri/0b.txt.decrypted");
+		File emptyDir = new File("C:/omri");
 
+		System.out.println(authUtil.getAuthTag(key, inputFile));
+		System.out.println(authUtil.getAuthTag(key, inputFile));
+		System.out.println(authUtil.getAuthTag(key, inputFile));
+		//System.out.println(encryptedFile + " tag = " + authUtil.getAuthTag(key, encryptedFile));
+		//System.out.println(inputFile + " tag = " + authUtil.getAuthTag(key, inputFile));
 		
-		
-		System.out.println(encryptedFile + " tag = " + authUtil.getAuthTag(key, encryptedFile));
-		System.out.println(inputFile + " tag = " + authUtil.getAuthTag(key, inputFile));
-		
+		//System.out.println("deleting " + inputFile + " " + inputFile.delete());
 		
 		/*String algo = "HMACSHA256";
 

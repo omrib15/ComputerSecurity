@@ -28,6 +28,7 @@ public class MultipartUploadUtility {
 	private OutputStream outputStream;
 	private PrintWriter writer;
 	private UserInfo user;
+	private File uploadFile;
 	/**
 	 * This constructor initializes a new HTTP POST request with content type is
 	 * set to multipart/form-data.
@@ -40,6 +41,7 @@ public class MultipartUploadUtility {
 			throws IOException {
 
 		this.user = user;
+		this.uploadFile = uploadFile;
 		// creates a unique boundary based on time stamp
 		boundary = "===" + System.currentTimeMillis() + "===";
 
@@ -126,5 +128,6 @@ public class MultipartUploadUtility {
 		} else {
 			System.out.println("Upload caused server to respond with status: "+status);
 		}
+		
 	}
 }
