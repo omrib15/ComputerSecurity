@@ -8,7 +8,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.Key;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.StringTokenizer;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -29,6 +33,14 @@ public class CryptoUtilsTest {
 		File decryptedFile = new File("C:/omri/0b.txt.decrypted");
 		File emptyDir = new File("C:/omri");
 
+		List<String> list = new ArrayList<String>();
+		list.add("hi");
+		list.add("shalom");
+		StringTokenizer tokenizer = new StringTokenizer("abba,saba", ",");
+		System.out.println(tokenizer.nextToken() + " " + tokenizer.nextToken() + " " );
+		System.out.println(list.contains("shalom"));
+			
+		
 		System.out.println(authUtil.getAuthTag(key, inputFile));
 		System.out.println(authUtil.getAuthTag(key, inputFile));
 		System.out.println(authUtil.getAuthTag(key, inputFile));

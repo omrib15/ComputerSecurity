@@ -74,7 +74,7 @@ PropertyChangeListener {
 	private JList fileList = new JList(fileListModel);
 	private JScrollPane fileListScroller = new JScrollPane(fileList);
 
-
+	private static final String UNAUTHORIZED_CHANGES_MADE = "Warning: unauthorized changes may have been made to your files on the server";
 
 	public UserFrame(UserInfo user) throws IOException {
 		super("Swing File Upload to HTTP server");
@@ -436,28 +436,16 @@ PropertyChangeListener {
 		for(int i = 0; i < list.size() ; i++){
 			String fileName = (String) list.get(i);
 			
-			if(fileName.equals("Warning: file size changed on server")){
+			if(fileName.equals(UNAUTHORIZED_CHANGES_MADE)){
 				JOptionPane.showMessageDialog(this, fileName,
 						"Error", JOptionPane.ERROR_MESSAGE);
+				return;
 				
-			}
-
-			else if(fileName.equals("Warning: authentication file deleted from server")){
-				JOptionPane.showMessageDialog(this, fileName,
-						"Error", JOptionPane.ERROR_MESSAGE);
-			}
-
-			else if(fileName.equals("Warning: file name has changed on server")){
-				JOptionPane.showMessageDialog(this, fileName,
-						"Error", JOptionPane.ERROR_MESSAGE);
 			}
 			
 			else{
-
-				System.out.println(">>> UpdateFileList fileName = " + fileName);
 				//decrypt file names
 				String decFileName = CryptoUtils.decryptString(user.getEncKey(), fileName);
-				System.out.println(">>> UpdateFileList decFileName = " + decFileName);
 				//prevent duplicates
 				if(!fileListModel.contains(decFileName)){
 					fileListModel.addElement(decFileName);

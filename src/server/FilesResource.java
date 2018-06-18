@@ -25,6 +25,8 @@ import org.apache.commons.io.FileUtils;
 
 @Path("/Files")
 public class FilesResource {
+	
+	private static final String UNAUTHORIZED_CHANGES_MADE = "Warning: unauthorized changes may have been made to your files on the server";
 
 	private static final String USERS_DIR_PATH = "C:/omri/study/sem8/security/codeJava/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/UploadServletApp/users";
 
@@ -45,14 +47,20 @@ public class FilesResource {
 		//this loop fills the list of file names
 		for (int i = 0; i < listOfFiles.length; i++) {
 			String fName = listOfFiles[i].getName();
-			
+
 			if (listOfFiles[i].isFile()) {
 				fileNames.add(checkFile(listOfFiles[i], userName));
 			} 
-			
+
 			else if (listOfFiles[i].isDirectory()) {
 				System.out.println("Directory " + fName);
 			}
+		}
+		
+		//go over the auth file and make sure all files on it exist
+		String checkAuthResult = checkAuthFile(fileNames, userName);
+		if(checkAuthResult == UNAUTHORIZED_CHANGES_MADE){
+			fileNames.add(checkAuthResult);
 		}
 
 		return fileNames;
@@ -91,55 +99,57 @@ public class FilesResource {
 	private void deleteFromAuthFile(String authFilePath, String fileName) throws IOException{
 
 		File authFile = new File(authFilePath);
-		
+
 		String fileContext = FileUtils.readFileToString(authFile);
-		
+
 		int tripletIndex = fileContext.indexOf("<"+fileName);
-		
+
 		String fileTriplet = fileContext.substring( tripletIndex , fileContext.indexOf('>', tripletIndex)+1);
 
 		fileContext = fileContext.replace(fileTriplet, "");
-		
+
 		FileUtils.write(authFile, fileContext);
 	}
 
-	private String checkFile(File file, String userName) {
-		String retVal = file.getName();
-		
+
+	private String checkAuthFile(List<String> fileNames, String userName){
+
 		String authDirPath = USERS_DIR_PATH + File.separator + userName + File.separator + "auth";
 		File authDir = new File(authDirPath);
-		
+
 		//create auth directory if doesnt exist
 		if(!authDir.exists()){
 			authDir.mkdir();
 		}
-		
+
 		File authFile = new File(authDirPath + File.separator+"auth.txt");
 		if(authFile.exists()){
 			String fileContext;
-			
+
 			try {
 				fileContext = FileUtils.readFileToString(authFile);
 			} catch (IOException e) {
 				e.printStackTrace();
-				return "Warning: authentication file changed on server";
-				
+				return UNAUTHORIZED_CHANGES_MADE;
+			}
+
+
+			StringTokenizer tokenizer = new StringTokenizer(fileContext, "<");
+			String triplet,fileNameAuthFIle;
+
+			while(tokenizer.hasMoreTokens()){
+				triplet = tokenizer.nextToken();
+				StringTokenizer tripletTokenizer = new StringTokenizer(triplet, ",");
+				fileNameAuthFIle =  tripletTokenizer.nextToken();
+				System.out.println("=================== fileNameAuthFIle  "+ fileNameAuthFIle);
+				if(!fileNames.contains(fileNameAuthFIle)){
+					return UNAUTHORIZED_CHANGES_MADE;
+				}
+
 			}
 			
-			int tripletIndex = fileContext.indexOf("<"+file.getName());
-			String fileTriplet = fileContext.substring( tripletIndex + 1 , fileContext.indexOf('>', tripletIndex));
-			StringTokenizer tokenizer = new StringTokenizer(fileTriplet, ",");
-			
-			if(!file.getName().equals(tokenizer.nextToken())){
-				retVal = "Warning: file name has changed on server";
-			}
-			
-			String tag = tokenizer.nextToken();
-			
-			if(file.length() != Long.parseLong(tokenizer.nextToken())){
-				retVal = "Warning: file size changed on server";
-			}
-		
+			return "all files listed on auth file exist";
+
 		}
 		
 		else{
@@ -148,8 +158,67 @@ public class FilesResource {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			//retVal = "Warning: authentication file deleted from server";
 		}
+		
+		return "";
+	}
+
+
+
+
+
+	private String checkFile(File file, String userName) {
+		String retVal = file.getName();
+
+		String authDirPath = USERS_DIR_PATH + File.separator + userName + File.separator + "auth";
+		File authDir = new File(authDirPath);
+
+		//create auth directory if doesnt exist
+		if(!authDir.exists()){
+			authDir.mkdir();
+		}
+
+		File authFile = new File(authDirPath + File.separator+"auth.txt");
+		if(authFile.exists()){
+			String fileContext;
+
+			try {
+				fileContext = FileUtils.readFileToString(authFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return UNAUTHORIZED_CHANGES_MADE;
+
+			}
+
+			int tripletIndex = fileContext.indexOf("<"+file.getName());
+
+			if(tripletIndex == -1){
+				return UNAUTHORIZED_CHANGES_MADE;
+			}
+
+			String fileTriplet = fileContext.substring( tripletIndex + 1 , fileContext.indexOf('>', tripletIndex));
+			StringTokenizer tokenizer = new StringTokenizer(fileTriplet, ",");
+
+			if(!file.getName().equals(tokenizer.nextToken())){
+				retVal = UNAUTHORIZED_CHANGES_MADE;
+			}
+
+			String tag = tokenizer.nextToken();
+
+			if(file.length() != Long.parseLong(tokenizer.nextToken())){
+				retVal = UNAUTHORIZED_CHANGES_MADE;
+			}
+
+		}
+
+		else{
+			try {
+				authFile.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
 		System.out.println(")(*&^$#%@ retVal " + retVal);
 		return retVal;
 	}

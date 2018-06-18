@@ -8,8 +8,8 @@ import java.security.Key;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import sun.misc.BASE64Encoder;
-
+//import sun.misc.BASE64Encoder;
+import java.util.Base64;
 public class authUtil {
 
 
@@ -24,7 +24,9 @@ public class authUtil {
 
 			FileInputStream in = new FileInputStream(file);
 			byte[] macb = processFile(mac, in);
-			String encoded = new BASE64Encoder().encode(macb);
+			Base64.Encoder encoder = Base64.getEncoder();
+			String encoded = encoder.encodeToString(macb);
+			//String encoded = new BASE64Encoder().encode(macb);
 			in.close();
 			System.out.println(file + ": " + encoded + " macb :" + macb);
 			return encoded;

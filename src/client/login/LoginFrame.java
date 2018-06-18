@@ -109,13 +109,8 @@ public class LoginFrame extends JFrame{
 		UserInfo user = new UserInfo(username,pass);
 		
 		if(checkLength(username,pass)){ 
-			/*String hashedPass = Hashing.sha256()
-					.hashString(pass+PASSWORD_SECRET_NUM, StandardCharsets.UTF_8)
-					.toString();
-			*/
-			Client client = ClientBuilder.newClient();
 
-			//String authHeaderVal = "Basic " + Base64.encodeAsString(username + ":"+hashedPass);
+			Client client = ClientBuilder.newClient();
 
 			Response response = client.target("http://localhost:8080/UploadServletApp/webapi/login")
 					.request().header("Authorization", user.getAuthHeaderVal()).get();
