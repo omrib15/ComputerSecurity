@@ -34,7 +34,7 @@ public class registrationResource {
 				.toString();
 
 		String credentialsToPersist = username + "," + salt + "," + hashedPassAndSalt + ".";
-		System.out.println("credentials to persist : " + credentialsToPersist);
+
 		try {
 			Files.write(Paths.get(PASS_FILE_PATH), credentialsToPersist.getBytes(), StandardOpenOption.APPEND);
 		} catch (IOException e) {
