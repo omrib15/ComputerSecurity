@@ -39,6 +39,7 @@ import client.JFilePicker;
 import client.encryption.CryptoException;
 import client.encryption.CryptoUtils;
 import client.login.LoginFrame;
+import client.mac.authUtil;
 import sun.misc.BASE64Decoder;
 
 
@@ -254,13 +255,15 @@ PropertyChangeListener {
 		}
 
 		File selectedFile = new File(filePath);
+		
+		System.out.println("777777777777 selectedFile.length = " + selectedFile.length());
 		final File encryptedFile = new File(encFilePath);
 		final File encryptedFilePath = new File(encryptedFile.getAbsolutePath().substring(0 , encryptedFile.getAbsolutePath().indexOf(fileName)) + encFileName);
 
 		try {
 			//encrypt the file
 			CryptoUtils.encrypt(user.getEncKey(), selectedFile, encryptedFile);
-			System.out.println(encryptedFile.renameTo(encryptedFilePath));
+			encryptedFile.renameTo(encryptedFilePath);
 
 			progressBar.setValue(0);
 
@@ -279,10 +282,7 @@ PropertyChangeListener {
 
 					}
 					//dont forget to delete the temporary encrypted file
-					//System.out.println("trying to delete "+encryptedFile +encryptedFile.delete());
 					System.out.println("trying to delete "+encryptedFilePath.getAbsolutePath()+" " +encryptedFilePath.delete());
-
-
 				}
 			};
 
@@ -295,7 +295,6 @@ PropertyChangeListener {
 					"Error executing upload task: " + ex.getMessage(), "Error",
 					JOptionPane.ERROR_MESSAGE);
 			//dont forget to delete the temporary encrypted file
-			//encryptedFile.delete();
 			encryptedFilePath.delete();
 		}
 
@@ -309,6 +308,7 @@ PropertyChangeListener {
 	 */
 	private void buttonDownloadActionPerformed(ActionEvent event) throws IOException {
 		String dest = "";
+		String tag;
 		if( dirChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION){
 			//get destination path
 			dest = dirChooser.getSelectedFile().getAbsolutePath();
@@ -320,7 +320,7 @@ PropertyChangeListener {
 
 			String url = uploadUrl+"?fileName=" + encFileName + "&username="+user.getUsername();
 			System.out.println("get url : " +url);
-			HttpDownloadUtility.downloadFile(url, dest);
+			tag = HttpDownloadUtility.downloadFile(url, dest);
 
 			File downloadedFile = new File(dest+"/"+encFileName);
 
@@ -328,25 +328,40 @@ PropertyChangeListener {
 			RandomAccessFile file = new RandomAccessFile(downloadedFile,"rwd");
 
 			file.setLength(downloadedFile.length()-2);
-
+			
 			System.out.println("downloaded "+ downloadedFile.getName()+ " from server with length = " + downloadedFile.length());
-
-			File decryptedFile = new File(dest+"/"+fileName);
-			//.replaceAll(".encrypted", "") );
-
-
-			try {
-				CryptoUtils.decrypt(user.getEncKey(), downloadedFile, decryptedFile);
-			} catch (CryptoException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			
+			//authenticate the downloaded file 
+			if(tag.equals(authUtil.getAuthTag(user.getAuthKey(), downloadedFile))){
+				JOptionPane.showMessageDialog(null,
+						"File has been downloaded successfully!", "Message",
+						JOptionPane.INFORMATION_MESSAGE);
+				
+				File decryptedFile = new File(dest+"/"+fileName);
+				try {
+					CryptoUtils.decrypt(user.getEncKey(), downloadedFile, decryptedFile);
+				} catch (CryptoException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
+			
+			else if(tag.equals(HttpDownloadUtility.NO_FILE_TO_DOWNLOAD)){
+				JOptionPane.showMessageDialog(null,
+						"Error: " + HttpDownloadUtility.NO_FILE_TO_DOWNLOAD , "Error",
+						JOptionPane.ERROR_MESSAGE);
+			}
+			
+			else{
+				JOptionPane.showMessageDialog(null,
+						"Warning: file content had been modified on server. download aborted", "Error",
+						JOptionPane.WARNING_MESSAGE);
+			}
+			
+			
 
 			file.close();
 			downloadedFile.delete();
-			System.out.println("user.getEncKey() = " +user.getEncKey());
-			System.out.println("user.getEncKey().length() = " +user.getEncKey().length());
-
 
 		}
 
@@ -425,8 +440,6 @@ PropertyChangeListener {
 		Response response = client.target("http://localhost:8080/UploadServletApp/webapi/Files/" + user.getUsername())
 				.request().header("Authorization", user.getAuthHeaderVal()).get();
 
-		System.out.println("MMMMMMMMMMM  authHeaderVal = " + user.getAuthHeaderVal());
-
 		ArrayList list = response.readEntity(ArrayList.class);
 
 		//clear the list
@@ -438,7 +451,7 @@ PropertyChangeListener {
 			
 			if(fileName.equals(UNAUTHORIZED_CHANGES_MADE)){
 				JOptionPane.showMessageDialog(this, fileName,
-						"Error", JOptionPane.ERROR_MESSAGE);
+						"Warning", JOptionPane.WARNING_MESSAGE);
 				return;
 				
 			}

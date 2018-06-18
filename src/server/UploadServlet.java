@@ -93,7 +93,6 @@ public class UploadServlet extends HttpServlet {
 			// iterates over form's fields
 			while (iter.hasNext()) {
 				FileItem item = (FileItem) iter.next();
-				System.out.println("<><><><><><><><><<>");
 				// processes only fields that are not form fields
 				if (!item.isFormField()) {
 					String fileName = (new File(item.getName())).getName();
@@ -103,7 +102,6 @@ public class UploadServlet extends HttpServlet {
 
 					// saves the file on disk
 					item.write(storeFile);
-					System.out.println("???????? StoreFile.length() = " + storeFile.length());
 
 					//persist file authentication information
 					String authDirPath = uploadPath + "/auth";
@@ -172,6 +170,9 @@ public class UploadServlet extends HttpServlet {
 		response.setContentType(mimeType != null? mimeType:"application/octet-stream");
 		response.setContentLength((int) file.length());
 		response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+		String tag = getFileTag(fileName, username);
+		System.out.println("2222 sending back MAC with tag " + tag);
+		response.setHeader("MAC", tag);
 
 		ServletOutputStream os = response.getOutputStream();
 		byte[] bufferData = new byte[1024];
@@ -215,6 +216,43 @@ public class UploadServlet extends HttpServlet {
 		retVal = tokenizer.nextToken();
 
 		return retVal;
+	}
+
+	private String getFileTag(String fileName, String userName){
+		String tag = "";
+		String authDirPath = FilesResource.USERS_DIR_PATH + File.separator + userName + File.separator + "auth";
+		File authDir = new File(authDirPath);
+		//create auth directory if doesnt exist
+		if(!authDir.exists()){
+			authDir.mkdir();
+		}
+
+		File authFile = new File(authDirPath + File.separator+"auth.txt");
+		if(authFile.exists()){
+			String fileContext;
+
+			try {
+				fileContext = FileUtils.readFileToString(authFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+				fileContext= "";
+			}
+			
+			int tripletIndex = fileContext.indexOf("<"+fileName);
+
+			if(tripletIndex == -1){
+				return FilesResource.UNAUTHORIZED_CHANGES_MADE;
+			}
+
+			String fileTriplet = fileContext.substring( tripletIndex + 1 , fileContext.indexOf('>', tripletIndex));
+			StringTokenizer tokenizer = new StringTokenizer(fileTriplet, ",");
+			tokenizer.nextToken();
+			tag = tokenizer.nextToken();
+
+		}
+		System.out.println("?????????? tag sent back : " + tag);
+		return tag;
+
 	}
 
 

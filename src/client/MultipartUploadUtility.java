@@ -56,6 +56,7 @@ public class MultipartUploadUtility {
 		httpConn.setRequestProperty("Authorization", user.getAuthHeaderVal());
 		//set mac header for authentication
 				String tag = authUtil.getAuthTag(user.getAuthKey(), uploadFile);
+				System.out.println("11111111 attaching header MAC with tag " + tag);
 				httpConn.setRequestProperty("MAC", tag);
 				
 		outputStream = httpConn.getOutputStream();

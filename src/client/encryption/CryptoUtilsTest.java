@@ -29,21 +29,14 @@ public class CryptoUtilsTest {
 		String key = "5a7127b8915a15287ed7a3da0e65378964e5babdfd0579ad399551ce49099849".substring(0, 32);
 
 		File inputFile = new File("C:/omri/0b.txt");
-		File encryptedFile = new File("C:/omri/kesem.txt");
+		File encryptedFile = new File("C:/omri/0b/0b.txt");
 		File decryptedFile = new File("C:/omri/0b.txt.decrypted");
 		File emptyDir = new File("C:/omri");
 
-		List<String> list = new ArrayList<String>();
-		list.add("hi");
-		list.add("shalom");
-		StringTokenizer tokenizer = new StringTokenizer("abba,saba", ",");
-		System.out.println(tokenizer.nextToken() + " " + tokenizer.nextToken() + " " );
-		System.out.println(list.contains("shalom"));
-			
-		
+				
 		System.out.println(authUtil.getAuthTag(key, inputFile));
-		System.out.println(authUtil.getAuthTag(key, inputFile));
-		System.out.println(authUtil.getAuthTag(key, inputFile));
+		System.out.println(authUtil.getAuthTag(key, encryptedFile));
+		//System.out.println(authUtil.getAuthTag(key, inputFile));
 		//System.out.println(encryptedFile + " tag = " + authUtil.getAuthTag(key, encryptedFile));
 		//System.out.println(inputFile + " tag = " + authUtil.getAuthTag(key, inputFile));
 		

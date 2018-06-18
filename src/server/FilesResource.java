@@ -26,9 +26,9 @@ import org.apache.commons.io.FileUtils;
 @Path("/Files")
 public class FilesResource {
 	
-	private static final String UNAUTHORIZED_CHANGES_MADE = "Warning: unauthorized changes may have been made to your files on the server";
+	public static final String UNAUTHORIZED_CHANGES_MADE = "Warning: unauthorized changes may have been made to your files on the server";
 
-	private static final String USERS_DIR_PATH = "C:/omri/study/sem8/security/codeJava/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/UploadServletApp/users";
+	public static final String USERS_DIR_PATH = "C:/omri/study/sem8/security/codeJava/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/UploadServletApp/users";
 
 	@Path("/{userName}")
 	@GET
