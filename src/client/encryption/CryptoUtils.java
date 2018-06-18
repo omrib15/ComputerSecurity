@@ -45,13 +45,6 @@ public class CryptoUtils {
 			FileOutputStream outputStream = new FileOutputStream(outputFile);
 			outputStream.write(outputBytes);
 
-			/*
-			String encFilePath = inputFile.getAbsolutePath().replaceAll(inputFile.getName(), encryptString(key, inputFile.getName()));
-			System.out.println("???::::: encfilepath : "+ encFilePath);
-			outputFile.renameTo(new File(encFilePath));
-			System.out.println("???::::: outputFile.getname() : "+ outputFile.getName());
-			 */
-
 			inputStream.close();
 			outputStream.close();
 
@@ -72,8 +65,6 @@ public class CryptoUtils {
 			String replaced = new BASE64Encoder().encode(encrypted);
 			replaced = replaced.replaceAll("\\+", "9999");
 			replaced = replaced.replaceAll("/", "!!!!");
-			
-			System.out.println("encryptString encrypted = " + new BASE64Encoder().encode(encrypted));
 
 			return replaced;
 			//return new BASE64Encoder().encode(encrypted).replaceAll("/", "!!!!");

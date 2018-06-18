@@ -28,7 +28,7 @@ public class authUtil {
 			String encoded = encoder.encodeToString(macb);
 			//String encoded = new BASE64Encoder().encode(macb);
 			in.close();
-			System.out.println(file + ": " + encoded + " macb :" + macb);
+
 			return encoded;
 		}
 

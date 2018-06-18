@@ -52,9 +52,9 @@ public class FilesResource {
 				fileNames.add(checkFile(listOfFiles[i], userName));
 			} 
 
-			else if (listOfFiles[i].isDirectory()) {
+			/*else if (listOfFiles[i].isDirectory()) {
 				System.out.println("Directory " + fName);
-			}
+			}*/
 		}
 		
 		//go over the auth file and make sure all files on it exist
@@ -75,9 +75,8 @@ public class FilesResource {
 		try{
 			File file = new File(dir + "/" + fileName);
 
-			System.out.println("path to file: "+ dir + "/" + fileName);
 			if(file.delete()){
-				System.out.println(file.getName() + " is deleted!");
+				//System.out.println(file.getName() + " is deleted!");
 
 				String authDirPath = dir + "/auth";
 				String authFilePath = authDirPath+"/auth.txt";
@@ -141,7 +140,7 @@ public class FilesResource {
 				triplet = tokenizer.nextToken();
 				StringTokenizer tripletTokenizer = new StringTokenizer(triplet, ",");
 				fileNameAuthFIle =  tripletTokenizer.nextToken();
-				System.out.println("=================== fileNameAuthFIle  "+ fileNameAuthFIle);
+	
 				if(!fileNames.contains(fileNameAuthFIle)){
 					return UNAUTHORIZED_CHANGES_MADE;
 				}
@@ -219,7 +218,6 @@ public class FilesResource {
 			}
 		}
 
-		System.out.println(")(*&^$#%@ retVal " + retVal);
 		return retVal;
 	}
 

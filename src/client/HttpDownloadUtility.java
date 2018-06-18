@@ -75,11 +75,7 @@ public class HttpDownloadUtility {
 			inputStream.close();
 
 			System.out.println("File downloaded");
-			//notify successful download
-			/*JOptionPane.showMessageDialog(null,
-					"File has been downloaded successfully!", "Message",
-					JOptionPane.INFORMATION_MESSAGE);
-			*/
+			
 			retVal =  tag;
 
 

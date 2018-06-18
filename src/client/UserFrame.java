@@ -235,8 +235,7 @@ PropertyChangeListener {
 		//the encrypted file name
 		String encFileName = CryptoUtils.encryptString(user.getEncKey(), fileName);
 		String decFileName = CryptoUtils.decryptString(user.getEncKey(), encFileName);
-		System.out.println("<><><>< Upload: fileName: " +fileName + " encFileName : " +encFileName+ " decFileName " + decFileName);
-
+		
 		//String encFilePath = filePath.substring(0 , filePath.lastIndexOf("\\")) + "/" +encFileName ;
 		String encFilePath = filePath+".encrypted";
 
@@ -256,7 +255,6 @@ PropertyChangeListener {
 
 		File selectedFile = new File(filePath);
 		
-		System.out.println("777777777777 selectedFile.length = " + selectedFile.length());
 		final File encryptedFile = new File(encFilePath);
 		final File encryptedFilePath = new File(encryptedFile.getAbsolutePath().substring(0 , encryptedFile.getAbsolutePath().indexOf(fileName)) + encFileName);
 
@@ -282,7 +280,7 @@ PropertyChangeListener {
 
 					}
 					//dont forget to delete the temporary encrypted file
-					System.out.println("trying to delete "+encryptedFilePath.getAbsolutePath()+" " +encryptedFilePath.delete());
+					encryptedFilePath.delete();
 				}
 			};
 
@@ -319,7 +317,6 @@ PropertyChangeListener {
 			String encFileName = CryptoUtils.encryptString(user.getEncKey(), fileName);
 
 			String url = uploadUrl+"?fileName=" + encFileName + "&username="+user.getUsername();
-			System.out.println("get url : " +url);
 			tag = HttpDownloadUtility.downloadFile(url, dest);
 
 			File downloadedFile = new File(dest+"/"+encFileName);
@@ -376,7 +373,6 @@ PropertyChangeListener {
 		String fileName = (String) fileList.getSelectedValue();
 		String encFileName = CryptoUtils.encryptString(user.getEncKey(), fileName);
 
-		System.out.println("!@#!@#!@# fileName = " + fileName );
 		if(fileName != null){
 			//prompt a user confirmation
 			int userRes = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete file: " + fileName, "Confirm",

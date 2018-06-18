@@ -250,7 +250,7 @@ public class UploadServlet extends HttpServlet {
 			tag = tokenizer.nextToken();
 
 		}
-		System.out.println("?????????? tag sent back : " + tag);
+
 		return tag;
 
 	}
