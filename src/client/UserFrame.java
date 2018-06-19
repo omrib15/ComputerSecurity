@@ -135,7 +135,7 @@ PropertyChangeListener {
 		labelUpload.setFont(new Font(upFont.getFontName(), Font.BOLD, upFont.getSize()+2));
 		labelDownload.setFont(new Font(upFont.getFontName(), Font.BOLD, upFont.getSize()+2));
 
-		fileListScroller.setPreferredSize(new Dimension(100, 150));
+		fileListScroller.setPreferredSize(new Dimension(150, 150));
 		progressBar.setPreferredSize(new Dimension(215, 30));
 		progressBar.setStringPainted(true);
 		//fill the list with the user's file names 
@@ -211,8 +211,8 @@ PropertyChangeListener {
 		constraints.gridx = 0;
 		constraints.gridy = 5;
 		constraints.weightx = 0.0;
-		constraints.anchor = GridBagConstraints.EAST;
-		constraints.fill = GridBagConstraints.HORIZONTAL;
+		constraints.anchor = GridBagConstraints.WEST;
+		//constraints.fill = GridBagConstraints.HORIZONTAL;
 		add(fileListScroller,constraints);
 
 
