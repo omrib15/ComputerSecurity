@@ -13,9 +13,6 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
@@ -27,20 +24,15 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
-
-import org.glassfish.jersey.internal.util.Base64;
 
 import client.JFilePicker;
 import client.encryption.CryptoException;
 import client.encryption.CryptoUtils;
 import client.login.LoginFrame;
 import client.mac.authUtil;
-import sun.misc.BASE64Decoder;
 
 
 /**
@@ -49,8 +41,9 @@ import sun.misc.BASE64Decoder;
  */
 public class UserFrame extends JFrame implements
 PropertyChangeListener {
-	//private String authHeaderVal;
-	//private String username;
+	
+	private static final long serialVersionUID = 2L;
+	
 	private UserInfo user;
 
 	private JFilePicker filePicker = new JFilePicker("Choose a file: ", "Browse");
@@ -67,21 +60,16 @@ PropertyChangeListener {
 	private JLabel labelUpload = new JLabel("Upload:");
 	private JLabel labelDownload = new JLabel("Manage your files: ");
 	private JLabel labelProgress = new JLabel("Upload progress:");
-	private JLabel labelFiles = new JLabel("Your Files:");
-
 	private String uploadUrl = "http://localhost:8080/UploadServletApp/UploadServlet";
 
-	private DefaultListModel fileListModel = new DefaultListModel();
-	private JList fileList = new JList(fileListModel);
+	private DefaultListModel<String> fileListModel = new DefaultListModel<String>();
+	private JList<String> fileList = new JList<String>(fileListModel);
 	private JScrollPane fileListScroller = new JScrollPane(fileList);
 
 	private static final String UNAUTHORIZED_CHANGES_MADE = "Warning: unauthorized changes may have been made to your files on the server";
 
 	public UserFrame(UserInfo user) throws IOException {
 		super("Swing File Upload to HTTP server");
-
-		//this.authHeaderVal = authHeaderVal;
-		//this.username = username;
 
 		this.user = user;
 
@@ -225,6 +213,18 @@ PropertyChangeListener {
 	/**
 	 * handle click event of the Upload button
 	 */
+	
+	/*public static void main(String[] args){
+		new JFrame().setVisible(true);
+		try {
+			new UserFrame(new UserInfo("123456", "123456")).setVisible(true);
+		} catch (IOException e) {
+			new JFrame().setVisible(true);
+			e.printStackTrace();
+		}
+		
+	}*/
+	
 	private void buttonUploadActionPerformed(ActionEvent event) {
 
 		String filePath = filePicker.getSelectedFilePath();
@@ -234,8 +234,6 @@ PropertyChangeListener {
 
 		//the encrypted file name
 		String encFileName = CryptoUtils.encryptString(user.getEncKey(), fileName);
-		String decFileName = CryptoUtils.decryptString(user.getEncKey(), encFileName);
-		
 		//String encFilePath = filePath.substring(0 , filePath.lastIndexOf("\\")) + "/" +encFileName ;
 		String encFilePath = filePath+".encrypted";
 
@@ -312,7 +310,7 @@ PropertyChangeListener {
 			dest = dirChooser.getSelectedFile().getAbsolutePath();
 
 			//download the file to the selected destination
-			String fileName = (String) fileList.getSelectedValue();
+			String fileName = fileList.getSelectedValue();
 			//fileName = fileName.replaceAll(" ", ";");
 			String encFileName = CryptoUtils.encryptString(user.getEncKey(), fileName);
 
@@ -338,7 +336,6 @@ PropertyChangeListener {
 				try {
 					CryptoUtils.decrypt(user.getEncKey(), downloadedFile, decryptedFile);
 				} catch (CryptoException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -370,7 +367,7 @@ PropertyChangeListener {
 	 */
 	private void buttonDeleteActionPerformed(ActionEvent event) {
 
-		String fileName = (String) fileList.getSelectedValue();
+		String fileName = fileList.getSelectedValue();
 		String encFileName = CryptoUtils.encryptString(user.getEncKey(), fileName);
 
 		if(fileName != null){
@@ -436,14 +433,15 @@ PropertyChangeListener {
 		Response response = client.target("http://localhost:8080/UploadServletApp/webapi/Files/" + user.getUsername())
 				.request().header("Authorization", user.getAuthHeaderVal()).get();
 
-		ArrayList list = response.readEntity(ArrayList.class);
+		@SuppressWarnings("unchecked")
+		ArrayList<String> list = response.readEntity(ArrayList.class);
 
 		//clear the list
 		fileListModel.clear();
 		
 		//update the list
 		for(int i = 0; i < list.size() ; i++){
-			String fileName = (String) list.get(i);
+			String fileName = list.get(i);
 			
 			if(fileName.equals(UNAUTHORIZED_CHANGES_MADE)){
 				JOptionPane.showMessageDialog(this, fileName,

@@ -11,10 +11,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
-import com.sun.xml.internal.messaging.saaj.util.Base64;
-
 import client.mac.authUtil;
-import sun.misc.BASE64Encoder;
 
 /**
  * This utility class provides an abstraction layer for sending multipart HTTP
@@ -27,8 +24,6 @@ public class MultipartUploadUtility {
 	private HttpURLConnection httpConn;
 	private OutputStream outputStream;
 	private PrintWriter writer;
-	private UserInfo user;
-	private File uploadFile;
 	/**
 	 * This constructor initializes a new HTTP POST request with content type is
 	 * set to multipart/form-data.
@@ -40,8 +35,6 @@ public class MultipartUploadUtility {
 	public MultipartUploadUtility(String requestURL, String charset, UserInfo user, File uploadFile)
 			throws IOException {
 
-		this.user = user;
-		this.uploadFile = uploadFile;
 		// creates a unique boundary based on time stamp
 		boundary = "===" + System.currentTimeMillis() + "===";
 

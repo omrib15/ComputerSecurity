@@ -8,7 +8,6 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -25,8 +24,6 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.internal.util.Base64;
-
-import sun.misc.BASE64Decoder;
 
 /**
  * A Java servlet that handles file upload from client.
@@ -87,8 +84,8 @@ public class UploadServlet extends HttpServlet {
 
 		try {
 			// parses the request's content to extract file data
-			List formItems = upload.parseRequest(request);
-			Iterator iter = formItems.iterator();
+			List<?> formItems = upload.parseRequest(request);
+			Iterator<?> iter = formItems.iterator();
 
 			// iterates over form's fields
 			while (iter.hasNext()) {
@@ -186,7 +183,7 @@ public class UploadServlet extends HttpServlet {
 		System.out.println("File downloaded at client successfully");
 	}
 
-	private ArrayList<String> getFileNames(String dir){
+	/*private ArrayList<String> getFileNames(String dir){
 		File folder = new File(dir);
 		File[] listOfFiles = folder.listFiles();
 		ArrayList<String> fileNames = new ArrayList<String>();
@@ -202,7 +199,7 @@ public class UploadServlet extends HttpServlet {
 		}
 
 		return fileNames;
-	}
+	}*/
 
 	private String getRequester(String authHeader){
 		String retVal;

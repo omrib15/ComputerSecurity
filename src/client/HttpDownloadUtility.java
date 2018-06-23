@@ -7,10 +7,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import javax.swing.JOptionPane;
-
-import client.mac.authUtil;
-
 /**
  * A utility that downloads a file from a URL.
  */

@@ -19,8 +19,6 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
-import org.glassfish.jersey.internal.util.Base64;
-
 import com.google.common.hash.Hashing;
 
 import client.UserFrame;
@@ -29,6 +27,7 @@ import client.UserInfo;
 
 public class LoginFrame extends JFrame{
 
+	private static final long serialVersionUID = 1L;
 	private JLabel userLabel;
 	private JTextField userText;
 	private JLabel passwordLabel;
@@ -36,9 +35,6 @@ public class LoginFrame extends JFrame{
 	private JButton loginButton;
 	private JButton registerButton;
 
-	private static final int PASSWORD_SECRET_NUM = 1;
-	private static final int ENCRYPTION_SECRET_NUM = 2;
-	private static final int AUTHENTICCATION_SECRET_NUM = 3;
 
 	public LoginFrame(String name){
 		super(name);
@@ -61,8 +57,9 @@ public class LoginFrame extends JFrame{
 
 	public static void main(String[] args) {
 		LoginFrame loginFrame = new LoginFrame("File manager");
-
+		
 		loginFrame.setVisible(true);
+		
 	}
 
 	public void placeComponents(JPanel panel) {
@@ -107,7 +104,7 @@ public class LoginFrame extends JFrame{
 		String username = userText.getText();
 		String pass = extractPass(passwordText);
 		UserInfo user = new UserInfo(username,pass);
-		
+
 		if(checkLength(username,pass)){ 
 
 			Client client = ClientBuilder.newClient();
@@ -131,9 +128,6 @@ public class LoginFrame extends JFrame{
 			}
 		}
 
-
-
-
 	}
 
 	private void buttonRegisterActionPerformed(ActionEvent event){
@@ -141,7 +135,7 @@ public class LoginFrame extends JFrame{
 		String username = userText.getText();
 		String pass = extractPass(passwordText) ;
 		String hashedPass = Hashing.sha256()
-				.hashString(pass+PASSWORD_SECRET_NUM, StandardCharsets.UTF_8)
+				.hashString(pass+UserInfo.PASSWORD_SECRET_NUM, StandardCharsets.UTF_8)
 				.toString();
 
 
@@ -218,7 +212,6 @@ public class LoginFrame extends JFrame{
 					new UserFrame(user).setVisible(true);
 
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

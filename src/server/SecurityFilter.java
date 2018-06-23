@@ -2,7 +2,6 @@ package server;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -104,11 +103,14 @@ public class SecurityFilter implements ContainerRequestFilter{
 				}
 				else{
 					if(compareToCredentials(currentCredentials, username, password)){
+						fis.close();
 						return AUTHENTICATION_SUCCESS;
 					}
 					currentCredentials = "";
 				}
 			}
+			
+			fis.close();
 			
 			//not registered
 			return AUTHENTICATION_FAIL;

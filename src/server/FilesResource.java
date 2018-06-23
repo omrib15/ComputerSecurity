@@ -2,24 +2,16 @@ package server;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.io.FileUtils;
 
 
@@ -46,15 +38,10 @@ public class FilesResource {
 
 		//this loop fills the list of file names
 		for (int i = 0; i < listOfFiles.length; i++) {
-			String fName = listOfFiles[i].getName();
 
 			if (listOfFiles[i].isFile()) {
 				fileNames.add(checkFile(listOfFiles[i], userName));
-			} 
-
-			/*else if (listOfFiles[i].isDirectory()) {
-				System.out.println("Directory " + fName);
-			}*/
+			}
 		}
 		
 		//go over the auth file and make sure all files on it exist
@@ -202,7 +189,7 @@ public class FilesResource {
 				retVal = UNAUTHORIZED_CHANGES_MADE;
 			}
 
-			String tag = tokenizer.nextToken();
+			tokenizer.nextToken();
 
 			if(file.length() != Long.parseLong(tokenizer.nextToken())){
 				retVal = UNAUTHORIZED_CHANGES_MADE;

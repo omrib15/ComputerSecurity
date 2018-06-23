@@ -7,9 +7,9 @@ import org.glassfish.jersey.internal.util.Base64;
 import com.google.common.hash.Hashing;
 
 public class UserInfo {
-	private static final int PASSWORD_SECRET_NUM = 1;
-	private static final int ENCRYPTION_SECRET_NUM = 2;
-	private static final int AUTHENTICCATION_SECRET_NUM = 3;
+	public static final int PASSWORD_SECRET_NUM = 1;
+	public static final int ENCRYPTION_SECRET_NUM = 2;
+	public static final int AUTHENTICCATION_SECRET_NUM = 3;
 	
 	private String username;
 	private String masterSecret;
