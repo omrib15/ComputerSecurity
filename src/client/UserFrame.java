@@ -60,7 +60,7 @@ PropertyChangeListener {
 	private JLabel labelUpload = new JLabel("Upload:");
 	private JLabel labelDownload = new JLabel("Manage your files: ");
 	private JLabel labelProgress = new JLabel("Upload progress:");
-	private String uploadUrl = "http://localhost:8080/UploadServletApp/UploadServlet";
+	private String uploadUrl = "http://localhost:9999/UploadServletApp/UploadServlet";
 
 	private DefaultListModel<String> fileListModel = new DefaultListModel<String>();
 	private JList<String> fileList = new JList<String>(fileListModel);
@@ -258,7 +258,9 @@ PropertyChangeListener {
 
 		try {
 			//encrypt the file
+			System.out.println("mark 1");
 			CryptoUtils.encrypt(user.getEncKey(), selectedFile, encryptedFile);
+			System.out.println("mark 2");
 			encryptedFile.renameTo(encryptedFilePath);
 
 			progressBar.setValue(0);
@@ -277,7 +279,7 @@ PropertyChangeListener {
 
 
 					}
-					//dont forget to delete the temporary encrypted file
+					//don't forget to delete the temporary encrypted file
 					encryptedFilePath.delete();
 				}
 			};
@@ -394,7 +396,7 @@ PropertyChangeListener {
 	private void sendDeleteRequest(String fileName){
 		Client client = ClientBuilder.newClient();
 
-		String deleteUrl = "http://localhost:8080/UploadServletApp/webapi/Files/"+user.getUsername()+"/"+fileName;
+		String deleteUrl = "http://localhost:9999/UploadServletApp/webapi/Files/"+user.getUsername()+"/"+fileName;
 
 		Response response = client.target(deleteUrl)
 				.request().header("Authorization", user.getAuthHeaderVal()).delete();
@@ -430,7 +432,7 @@ PropertyChangeListener {
 		Client client = ClientBuilder.newClient();
 
 		//send a get request and get the response
-		Response response = client.target("http://localhost:8080/UploadServletApp/webapi/Files/" + user.getUsername())
+		Response response = client.target("http://localhost:9999/UploadServletApp/webapi/Files/" + user.getUsername())
 				.request().header("Authorization", user.getAuthHeaderVal()).get();
 
 		@SuppressWarnings("unchecked")

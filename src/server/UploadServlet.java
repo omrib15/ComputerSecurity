@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -32,6 +33,10 @@ import org.glassfish.jersey.internal.util.Base64;
 public class UploadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
+	private final URL resource = getClass().getResource("/");
+	private final String path = resource.getPath().substring(1);
+	private final String USERS_PATH = path + "users";
+	
 	private static final String UPLOAD_DIRECTORY = "users";
 	private static final int THRESHOLD_SIZE 	= 1024 * 1024 * 3; 	// 3MB
 	private static final int MAX_FILE_SIZE 		= 1024 * 1024 * 40; // 40MB
@@ -67,8 +72,10 @@ public class UploadServlet extends HttpServlet {
 		upload.setSizeMax(MAX_REQUEST_SIZE);
 
 		// constructs the directory path to store upload file
-		String uploadPath = getServletContext().getRealPath("")
-				+ File.separator + UPLOAD_DIRECTORY;
+		
+		String uploadPath = USERS_PATH;
+				/*getServletContext().getRealPath("")
+				+ File.separator + UPLOAD_DIRECTORY;*/
 
 		// creates the directory if it does not exist
 		File uploadDir = new File(uploadPath);
@@ -152,8 +159,9 @@ public class UploadServlet extends HttpServlet {
 			throw new ServletException("File Name can't be null or empty");
 		}
 
-		String downloadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIRECTORY 
-				+ File.separator + username + File.separator +fileName  ;
+		String downloadPath = USERS_PATH + File.separator + username + File.separator +fileName;
+				/*getServletContext().getRealPath("") + File.separator + UPLOAD_DIRECTORY 
+				+ File.separator + username + File.separator +fileName  ;*/
 
 		File file = new File(downloadPath);
 		if(!file.exists()){
@@ -217,7 +225,7 @@ public class UploadServlet extends HttpServlet {
 
 	private String getFileTag(String fileName, String userName){
 		String tag = "";
-		String authDirPath = FilesResource.USERS_DIR_PATH + File.separator + userName + File.separator + "auth";
+		String authDirPath = USERS_PATH + File.separator + userName + File.separator + "auth";
 		File authDir = new File(authDirPath);
 		//create auth directory if doesnt exist
 		if(!authDir.exists()){

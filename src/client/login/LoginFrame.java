@@ -109,7 +109,7 @@ public class LoginFrame extends JFrame{
 
 			Client client = ClientBuilder.newClient();
 
-			Response response = client.target("http://localhost:8080/UploadServletApp/webapi/login")
+			Response response = client.target("http://localhost:9999/UploadServletApp/webapi/login")
 					.request().header("Authorization", user.getAuthHeaderVal()).get();
 
 			if(response.readEntity(String.class).equals("login successful")){
@@ -152,8 +152,10 @@ public class LoginFrame extends JFrame{
 		Client client = ClientBuilder.newClient();
 		//send a get request and get the response
 		String body = credentials.getUsername()+"."+credentials.getPassword();
-		Response response = client.target("http://localhost:8080/UploadServletApp/webapi/registration")
+		Response response = client.target("http://localhost:9999/UploadServletApp/webapi/registration")
 				.request().post(Entity.json(body));
+		
+		System.out.println("registration request returned with status: " + response.getStatus());
 
 		if(response.getStatus() >=  200 && response.getStatus() < 300){
 			JOptionPane.showMessageDialog(this, "Registration was successful",

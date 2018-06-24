@@ -14,5 +14,6 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="C:/omri/study/sem8/security/codeJava/FileManager_lib/activation.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

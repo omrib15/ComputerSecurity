@@ -3,6 +3,7 @@ package server;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -76,8 +77,11 @@ public class SecurityFilter implements ContainerRequestFilter{
 	}*/
 
 	private int authenticate(String username , String password) {
+		URL resource = getClass().getResource("/");
+		String path = resource.getPath().substring(1);
+		String userFilePath = path + "UserAuth/users.txt";
 		
-		String userFilePath = "C:/omri/study/sem8/security/codeJava/Auth/users/users.txt";
+		//String userFilePath = "C:/omri/study/sem8/security/codeJava/Auth/users/users.txt";
 		File usersFile = new File(userFilePath);
 
 		if (!usersFile.exists()) {
