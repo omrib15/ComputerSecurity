@@ -100,13 +100,17 @@ public class LoginFrame extends JFrame{
 
 	}
 
+	/*
+	 * handles login button action
+	 * */
 	private void buttonLoginActionPerformed(ActionEvent event){
 		String username = userText.getText();
 		String pass = extractPass(passwordText);
 		UserInfo user = new UserInfo(username,pass);
 
+		//make sure the username and password are legitimate
 		if(checkLength(username,pass)){ 
-
+			//create the Jersey client instance to send http requests
 			Client client = ClientBuilder.newClient();
 
 			Response response = client.target("http://localhost:9999/UploadServletApp/webapi/login")
@@ -116,7 +120,6 @@ public class LoginFrame extends JFrame{
 				JOptionPane.showMessageDialog(this, "login successful",
 						"Success", JOptionPane.INFORMATION_MESSAGE);
 
-				//openUserFrame(user.getAuthHeaderVal(), username);
 				openUserFrame(user);
 				this.setVisible(false);
 				this.dispose();

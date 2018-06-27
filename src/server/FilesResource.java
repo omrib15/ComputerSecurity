@@ -24,25 +24,27 @@ public class FilesResource {
 	private final URL resource = getClass().getResource("/");
 	private final String path = resource.getPath().substring(1);
 	private final String USERS_PATH = path + "users";
-	public static final String USERS_DIR_PATH = "C:/omri/study/sem8/security/codeJava/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/UploadServletApp/users";
+	//public static final String USERS_DIR_PATH = "C:/omri/study/sem8/security/codeJava/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/UploadServletApp/users";
 
+	/*
+	 * This method is invoked when a GET request to the annotated path is made
+	 * */
 	@Path("/{userName}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<String> getFileNames(@PathParam("userName") String userName){
-		//will change to user specific directory
-
+		//the requesting user directory
 		File userFolder = new File(USERS_PATH + File.separator + userName);
 		if (!userFolder.exists()) {
 			userFolder.mkdir();
 		}
-
+		
+		//list file names from user directory
 		File[] listOfFiles = userFolder.listFiles();
 		List<String> fileNames = new ArrayList<String>();
 
 		//this loop fills the list of file names
 		for (int i = 0; i < listOfFiles.length; i++) {
-
 			if (listOfFiles[i].isFile()) {
 				fileNames.add(checkFile(listOfFiles[i], userName));
 			}
@@ -57,6 +59,10 @@ public class FilesResource {
 		return fileNames;
 	}
 
+	
+	/*
+	 * This method is called when a DELETE request is made for the annotated path
+	 * */
 	@DELETE
 	@Path("/{userName}/{fileName}")
 	public void deleteFile(@PathParam("userName") String userName, @PathParam("fileName") String fileName){
@@ -85,19 +91,22 @@ public class FilesResource {
 
 		}
 	}
-
+	
+	//This method deletes the <fileName,tag,size> triplet from the special auth file	
 	private void deleteFromAuthFile(String authFilePath, String fileName) throws IOException{
 
 		File authFile = new File(authFilePath);
 
+		//the entire authFile content
 		String fileContext = FileUtils.readFileToString(authFile);
 
 		int tripletIndex = fileContext.indexOf("<"+fileName);
 
 		String fileTriplet = fileContext.substring( tripletIndex , fileContext.indexOf('>', tripletIndex)+1);
-
+		
+		//replace the files triplet with empty string
 		fileContext = fileContext.replace(fileTriplet, "");
-
+		//write the new authFile content to the authFile
 		FileUtils.write(authFile, fileContext);
 	}
 
@@ -142,9 +151,7 @@ public class FilesResource {
 				}
 
 			}
-			
 			return "all files listed on auth file exist";
-
 		}
 		
 		else{
@@ -157,9 +164,6 @@ public class FilesResource {
 		
 		return "";
 	}
-
-
-
 
 
 	private String checkFile(File file, String userName) {

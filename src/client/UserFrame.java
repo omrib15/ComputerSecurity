@@ -68,8 +68,9 @@ PropertyChangeListener {
 
 	private static final String UNAUTHORIZED_CHANGES_MADE = "Warning: unauthorized changes may have been made to your files on the server";
 
+	//Constructor
 	public UserFrame(UserInfo user) throws IOException {
-		super("Swing File Upload to HTTP server");
+		super("File Manager");
 
 		this.user = user;
 
@@ -189,21 +190,12 @@ PropertyChangeListener {
 		constraints.anchor = GridBagConstraints.WEST;
 		add(labelDownload, constraints);
 
-		/*constraints.gridx = 0;
-        constraints.gridy = 5;
-        constraints.fill = GridBagConstraints.NONE;
-        constraints.anchor = GridBagConstraints.WEST;
-        add(labelFiles,constraints);
-		 */
-
 		constraints.gridx = 0;
 		constraints.gridy = 5;
 		constraints.weightx = 0.0;
 		constraints.anchor = GridBagConstraints.WEST;
 		//constraints.fill = GridBagConstraints.HORIZONTAL;
 		add(fileListScroller,constraints);
-
-
 
 		pack();
 		setLocationRelativeTo(null);    // center on screen
@@ -214,17 +206,9 @@ PropertyChangeListener {
 	 * handle click event of the Upload button
 	 */
 	
-	/*public static void main(String[] args){
-		new JFrame().setVisible(true);
-		try {
-			new UserFrame(new UserInfo("123456", "123456")).setVisible(true);
-		} catch (IOException e) {
-			new JFrame().setVisible(true);
-			e.printStackTrace();
-		}
-		
-	}*/
-	
+	/*
+	 * handles Upload button action
+	 * */
 	private void buttonUploadActionPerformed(ActionEvent event) {
 
 		String filePath = filePicker.getSelectedFilePath();
@@ -234,7 +218,7 @@ PropertyChangeListener {
 
 		//the encrypted file name
 		String encFileName = CryptoUtils.encryptString(user.getEncKey(), fileName);
-		//String encFilePath = filePath.substring(0 , filePath.lastIndexOf("\\")) + "/" +encFileName ;
+		
 		String encFilePath = filePath+".encrypted";
 
 		//validate server url
@@ -258,9 +242,7 @@ PropertyChangeListener {
 
 		try {
 			//encrypt the file
-			System.out.println("mark 1");
 			CryptoUtils.encrypt(user.getEncKey(), selectedFile, encryptedFile);
-			System.out.println("mark 2");
 			encryptedFile.renameTo(encryptedFilePath);
 
 			progressBar.setValue(0);
@@ -295,8 +277,6 @@ PropertyChangeListener {
 			//dont forget to delete the temporary encrypted file
 			encryptedFilePath.delete();
 		}
-
-
 
 	}
 

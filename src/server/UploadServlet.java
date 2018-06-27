@@ -32,22 +32,23 @@ import org.glassfish.jersey.internal.util.Base64;
  */
 public class UploadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-
+	
 	private final URL resource = getClass().getResource("/");
 	private final String path = resource.getPath().substring(1);
 	private final String USERS_PATH = path + "users";
 	
-	private static final String UPLOAD_DIRECTORY = "users";
 	private static final int THRESHOLD_SIZE 	= 1024 * 1024 * 3; 	// 3MB
 	private static final int MAX_FILE_SIZE 		= 1024 * 1024 * 40; // 40MB
 	private static final int MAX_REQUEST_SIZE 	= 1024 * 1024 * 50; // 50MB
 	private static final String AUTHORIZATION_HEADER_PREFIX = "Basic ";
+	
 	/**
 	 * handles file upload via HTTP POST method
 	 */
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-
+		
+		//obtain the file's tag
 		String tag = request.getHeader("MAC");
 		String requestUsername;
 
@@ -72,23 +73,23 @@ public class UploadServlet extends HttpServlet {
 		upload.setSizeMax(MAX_REQUEST_SIZE);
 
 		// constructs the directory path to store upload file
-		
 		String uploadPath = USERS_PATH;
-				/*getServletContext().getRealPath("")
-				+ File.separator + UPLOAD_DIRECTORY;*/
 
-		// creates the directory if it does not exist
+
+		// create the users directory if it does not exist
 		File uploadDir = new File(uploadPath);
 		if (!uploadDir.exists()) {
 			uploadDir.mkdir();
 		}
-
+		
+		//create the specific user directory within the "users" directory
 		uploadPath += "/" + requestUsername; 
 		uploadDir = new File(uploadPath);
 		if (!uploadDir.exists()) {
 			uploadDir.mkdir();
 		}
 
+		//process the request's body and save the file on server
 		try {
 			// parses the request's content to extract file data
 			List<?> formItems = upload.parseRequest(request);
@@ -113,18 +114,21 @@ public class UploadServlet extends HttpServlet {
 					if(!authDir.exists()){
 						authDir.mkdir();
 					}
-
+					
+					//the path to the special tags file
 					String authFilePath = authDirPath+"/auth.txt";
+					//the information about the file that will be written to the special tags file
 					String fileAuthInfo = "<" + fileName +","+tag+"," + storeFile.length()+">";
 
 					File authFile = new File(authFilePath);
-
+					
 					if(!authFile.exists()){
 						authFile.createNewFile();
 					}
-
+					
 					String fileContext = FileUtils.readFileToString(authFile);
-
+					
+					//check if the authentication info about the file wasn't already written to auth file 
 					if(!fileContext.contains(fileAuthInfo)){
 						//write the file info to auth file
 						try {
@@ -137,7 +141,7 @@ public class UploadServlet extends HttpServlet {
 				}
 			}
 
-
+			//setup the proper http response to the client 
 			request.setAttribute("message", "Upload has been done successfully!");
 			System.out.println(" - - - - -response status = = = = " +response.getStatus());
 		} catch (Exception ex) {
@@ -150,6 +154,7 @@ public class UploadServlet extends HttpServlet {
 	 * handles file downloads
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
 		String fileName = request.getParameter("fileName");
 		String username = request.getParameter("username");
 
@@ -159,55 +164,45 @@ public class UploadServlet extends HttpServlet {
 			throw new ServletException("File Name can't be null or empty");
 		}
 
+		//the path on server to the requested file to download
 		String downloadPath = USERS_PATH + File.separator + username + File.separator +fileName;
-				/*getServletContext().getRealPath("") + File.separator + UPLOAD_DIRECTORY 
-				+ File.separator + username + File.separator +fileName  ;*/
 
 		File file = new File(downloadPath);
 		if(!file.exists()){
 			throw new ServletException("File doesn't exists on server.");
 		}
-
+		
 		System.out.println("File location on server::"+file.getAbsolutePath());
+		
 		ServletContext ctx = getServletContext();
 		InputStream fis = new FileInputStream(file);
 		String mimeType = ctx.getMimeType(file.getAbsolutePath());
+		
+		//setup some response headers
 		response.setContentType(mimeType != null? mimeType:"application/octet-stream");
 		response.setContentLength((int) file.length());
 		response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+		
+		/*get the file tag from the special tags file and add it to the response, for the client
+		to authenticate  */
 		String tag = getFileTag(fileName, username);
-		System.out.println("2222 sending back MAC with tag " + tag);
 		response.setHeader("MAC", tag);
 
+		//write the file to the response body
 		ServletOutputStream os = response.getOutputStream();
 		byte[] bufferData = new byte[1024];
 		int read=0;
 		while((read = fis.read(bufferData))!= -1){
 			os.write(bufferData, 0, read);
 		}
+		//send the response
 		os.flush();
 		os.close();
 		fis.close();
 		System.out.println("File downloaded at client successfully");
 	}
 
-	/*private ArrayList<String> getFileNames(String dir){
-		File folder = new File(dir);
-		File[] listOfFiles = folder.listFiles();
-		ArrayList<String> fileNames = new ArrayList<String>();
-
-		for (int i = 0; i < listOfFiles.length; i++) {
-			String fName = listOfFiles[i].getName();
-
-			if (listOfFiles[i].isFile()) { 
-				fileNames.add(fName);
-			} else if (listOfFiles[i].isDirectory()) {
-				System.out.println("Directory " + fName);
-			}
-		}
-
-		return fileNames;
-	}*/
+	
 
 	private String getRequester(String authHeader){
 		String retVal;

@@ -27,15 +27,18 @@ public class SecurityFilter implements ContainerRequestFilter{
 	private static final int AUTHENTICATION_FAIL = -1;
 	private static final int AUTHENTICATION_USER_FILE_NOT_FOUND = 0;
 
-
+	//Process incoming requests before passing the on to the resources
 	public void filter(ContainerRequestContext requestContext) throws IOException {
 		//do'nt filter if the request is for registering a new user
 		if(!requestContext.getUriInfo().getPath().contains(REGISTRATION)){
 			List<String> authHeader = requestContext.getHeaders().get(AUTHORIZATION_HEADER_KEY);
 
 			if(authHeader != null && authHeader.size() > 0 ){
+				
 				String authToken = authHeader.get(0);
+				//get the authHeader value, replace the Authorization prefix with empty string
 				authToken = authToken.replaceFirst(AUTHORIZATION_HEADER_PREFIX, "");
+				
 				String decodedString = Base64.decodeAsString(authToken);
 	
 				StringTokenizer tokenizer = new StringTokenizer(decodedString, ":");
@@ -44,15 +47,17 @@ public class SecurityFilter implements ContainerRequestFilter{
 
 				String password = tokenizer.nextToken();
 
+				//perform basic auth
 				int authRes = authenticate(username,password);
 
 				if(authRes == AUTHENTICATION_SUCCESS){
 					return;
 				}
+				
 				else if(authRes == AUTHENTICATION_USER_FILE_NOT_FOUND){
 					Response unauthorizedStatus = Response
 							.status(Response.Status.UNAUTHORIZED)
-							.entity("Users file not found")
+							.entity("Special Users file not found")
 							.build();
 
 					requestContext.abortWith(unauthorizedStatus);
@@ -71,19 +76,16 @@ public class SecurityFilter implements ContainerRequestFilter{
 	}
 
 
-	/*private boolean authenticate (String username,String password){
-
-		return false;
-	}*/
-
+	//Checks the user is registered
 	private int authenticate(String username , String password) {
+		//get the correct path to the special file holding user names and passwords(the derived ones of course)
 		URL resource = getClass().getResource("/");
 		String path = resource.getPath().substring(1);
 		String userFilePath = path + "UserAuth/users.txt";
 		
-		//String userFilePath = "C:/omri/study/sem8/security/codeJava/Auth/users/users.txt";
 		File usersFile = new File(userFilePath);
-
+		
+		//create the special file if it does not exist
 		if (!usersFile.exists()) {
 			System.out.println(userFilePath + " does not exist.");
 			return AUTHENTICATION_USER_FILE_NOT_FOUND;
@@ -126,7 +128,7 @@ public class SecurityFilter implements ContainerRequestFilter{
 
 	}
 
-
+	
 	private boolean compareToCredentials(String credentials, String username, String password){
 		StringTokenizer tokenizer = new StringTokenizer(credentials, ",");
 		
